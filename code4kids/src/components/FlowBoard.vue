@@ -1,5 +1,5 @@
 <template>
-  <div id="flow-board-component">
+  <div id="flow-board-component" class="flow-board-component">
     <h1> flow board component</h1>
   </div>
 </template>
