@@ -2,8 +2,8 @@ import
 <template>
   <div id="app">
     <app-play-board class="app-play-board"></app-play-board>
-    <app-blocks class="app-blocks"></app-blocks>
-    <app-flow-board class="app-flow-board"></app-flow-board>
+    <!--app-blocks class="app-blocks"></app-blocks>
+    <app-flow-board class="app-flow-board"></app-flow-board-->
     <router-view></router-view>
   </div>
 </template>
