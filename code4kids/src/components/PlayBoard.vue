@@ -12,7 +12,7 @@
     </div>
     <div id="animation-container" class="animation-container">
       <img src="../assets/backgrounds/dog-park.png" class="animation-background">
-      <img src="../assets/characters/doggy.gif" class="character" id="doggy">
+      <canvas id="knight" class="canvas"></canvas>
     </div>
   </div>
 </template>
@@ -25,7 +25,120 @@
     data () {
       return {
         instruction: '',
-        result: ''
+        result: '',
+        currentX: 0,
+        currentY: 90,
+        bps: 49,
+        step: 50,
+        cWidth: 29,
+        cHeight: 39,
+        speedfast: 200,
+        speednormal: 800,
+        attackspeed: 300,
+        debugMode: false,
+        initSprite: 'static/images/knight/walk/walk_0000.png',
+        walksprites: [
+          'static/images/knight/walk/walk_0000.png',
+          'static/images/knight/walk/walk_0001.png',
+          'static/images/knight/walk/walk_0002.png',
+          'static/images/knight/walk/walk_0003.png',
+          'static/images/knight/walk/walk_0004.png',
+          'static/images/knight/walk/walk_0005.png',
+          'static/images/knight/walk/walk_0006.png',
+          'static/images/knight/walk/walk_0007.png',
+          'static/images/knight/walk/walk_0008.png',
+          'static/images/knight/walk/walk_0009.png',
+          'static/images/knight/walk/walk_0010.png',
+          'static/images/knight/walk/walk_0011.png',
+          'static/images/knight/walk/walk_0012.png',
+          'static/images/knight/walk/walk_0013.png',
+          'static/images/knight/walk/walk_0014.png',
+          'static/images/knight/walk/walk_0015.png',
+          'static/images/knight/walk/walk_0016.png',
+          'static/images/knight/walk/walk_0017.png',
+          'static/images/knight/walk/walk_0018.png',
+          'static/images/knight/walk/walk_0019.png',
+          'static/images/knight/walk/walk_0020.png',
+          'static/images/knight/walk/walk_0021.png',
+          'static/images/knight/walk/walk_0022.png',
+          'static/images/knight/walk/walk_0023.png',
+          'static/images/knight/walk/walk_0024.png',
+          'static/images/knight/walk/walk_0025.png',
+          'static/images/knight/walk/walk_0026.png',
+          'static/images/knight/walk/walk_0027.png',
+          'static/images/knight/walk/walk_0028.png',
+          'static/images/knight/walk/walk_0029.png',
+          'static/images/knight/walk/walk_0030.png',
+          'static/images/knight/walk/walk_0031.png',
+          'static/images/knight/walk/walk_0032.png',
+          'static/images/knight/walk/walk_0033.png',
+          'static/images/knight/walk/walk_0034.png',
+          'static/images/knight/walk/walk_0035.png',
+          'static/images/knight/walk/walk_0036.png',
+          'static/images/knight/walk/walk_0037.png',
+          'static/images/knight/walk/walk_0038.png',
+          'static/images/knight/walk/walk_0039.png',
+          'static/images/knight/walk/walk_0040.png',
+          'static/images/knight/walk/walk_0041.png',
+          'static/images/knight/walk/walk_0042.png',
+          'static/images/knight/walk/walk_0043.png',
+          'static/images/knight/walk/walk_0044.png',
+          'static/images/knight/walk/walk_0045.png',
+          'static/images/knight/walk/walk_0046.png',
+          'static/images/knight/walk/walk_0047.png',
+          'static/images/knight/walk/walk_0048.png'
+        ],
+        attacksprites: [
+          'static/images/knight/attack/attack_0000.png',
+          'static/images/knight/attack/attack_0001.png',
+          'static/images/knight/attack/attack_0002.png',
+          'static/images/knight/attack/attack_0003.png',
+          'static/images/knight/attack/attack_0004.png',
+          'static/images/knight/attack/attack_0005.png',
+          'static/images/knight/attack/attack_0006.png',
+          'static/images/knight/attack/attack_0007.png',
+          'static/images/knight/attack/attack_0008.png',
+          'static/images/knight/attack/attack_0009.png',
+          'static/images/knight/attack/attack_0010.png',
+          'static/images/knight/attack/attack_0011.png',
+          'static/images/knight/attack/attack_0012.png',
+          'static/images/knight/attack/attack_0013.png',
+          'static/images/knight/attack/attack_0014.png',
+          'static/images/knight/attack/attack_0015.png',
+          'static/images/knight/attack/attack_0016.png',
+          'static/images/knight/attack/attack_0017.png',
+          'static/images/knight/attack/attack_0018.png',
+          'static/images/knight/attack/attack_0019.png',
+          'static/images/knight/attack/attack_0020.png',
+          'static/images/knight/attack/attack_0021.png',
+          'static/images/knight/attack/attack_0022.png',
+          'static/images/knight/attack/attack_0023.png',
+          'static/images/knight/attack/attack_0024.png',
+          'static/images/knight/attack/attack_0025.png',
+          'static/images/knight/attack/attack_0026.png',
+          'static/images/knight/attack/attack_0027.png',
+          'static/images/knight/attack/attack_0028.png',
+          'static/images/knight/attack/attack_0029.png',
+          'static/images/knight/attack/attack_0030.png',
+          'static/images/knight/attack/attack_0031.png',
+          'static/images/knight/attack/attack_0032.png',
+          'static/images/knight/attack/attack_0033.png',
+          'static/images/knight/attack/attack_0034.png',
+          'static/images/knight/attack/attack_0035.png',
+          'static/images/knight/attack/attack_0036.png',
+          'static/images/knight/attack/attack_0037.png',
+          'static/images/knight/attack/attack_0038.png',
+          'static/images/knight/attack/attack_0039.png',
+          'static/images/knight/attack/attack_0040.png',
+          'static/images/knight/attack/attack_0041.png',
+          'static/images/knight/attack/attack_0042.png',
+          'static/images/knight/attack/attack_0043.png',
+          'static/images/knight/attack/attack_0044.png',
+          'static/images/knight/attack/attack_0045.png',
+          'static/images/knight/attack/attack_0046.png',
+          'static/images/knight/attack/attack_0047.png',
+          'static/images/knight/attack/attack_0048.png'
+        ]
       }
     },
     methods: {
@@ -33,44 +146,122 @@
        * Execute the animation given an array of instructions.
        */
       runProgram (event) {
-        var moveRight = function (dist, character) {
+        var cx = this.currentX
+        var cy = this.currentY
+        var bps = this.bps
+        var step = this.step
+        var cw = this.cWidth
+        var ch = this.cHeight
+        var debugMode = this.debugMode
+        var attackspeed = this.attackspeed
+        var walk = this.speednormal
+        var walkimgs = []
+        for (var i = 0; i < this.walksprites.length; i++) {
+          var img = new Image()
+          img.src = this.walksprites[i]
+          walkimgs.push(img)
+        }
+        var attackimgs = []
+        for (i = 0; i < this.attacksprites.length; i++) {
+          img = new Image()
+          img.src = this.attacksprites[i]
+          attackimgs.push(img)
+        }
+        var c = document.getElementById('knight')
+        var move
+        var delay = 0
+        var blockQueue = []
+        var ctx = c.getContext('2d')
+
+        var drawCharacter = function (count, xoffset, yoffset, sprites) {
+          if (count < bps) {
+            ctx.clearRect(cx, cy, cw, ch)
+            cx += xoffset
+            cy += yoffset
+            console.log('Image Played: ' + sprites[count].src)
+            ctx.drawImage(sprites[count], 140, 110, 500, 600, cx, cy, cw, ch)
+            console.log('Draw Once' + ' cx: ' + cx + ' cy: ' + cy)
+          } else {
+            clearInterval(move)
+            console.log('Move interval end.')
+          }
+        }
+
+        var moveRight = function (step) {
           console.log('Animation Played: Move Right')
-          character.style.left = parseFloat(getComputedStyle(character).left) + dist + 'px'
-          console.log(character.style.left)
+          if (!debugMode) {
+            var count = 0
+            var xoffset = step / bps
+            move = setInterval(function () {
+              drawCharacter(count, xoffset, 0, walkimgs)
+              count++
+            }, walk / bps)
+          }
         }
-        var moveLeft = function (dist, character) {
+        var moveLeft = function (step) {
           console.log('Animation Played: Move Left')
-          character.style.left = parseFloat(getComputedStyle(character).left) - dist + 'px'
-          console.log(character.style.left)
+          if (!debugMode) {
+            var count = 0
+            var xoffset = -step / bps
+            move = setInterval(function () {
+              drawCharacter(count, xoffset, 0, walkimgs)
+              count++
+            }, walk / bps)
+          }
         }
-        var moveUp = function (dist, character) {
+        var moveUp = function (step) {
           console.log('Animation Played: Move Up')
-          character.style.top = parseFloat(getComputedStyle(character).top) - dist + 'px'
-          console.log(character.style.top)
+          if (!debugMode) {
+            var count = 0
+            var yoffset = -step / bps
+            move = setInterval(function () {
+              drawCharacter(count, 0, yoffset, walkimgs)
+              count++
+            }, walk / bps)
+          }
         }
-        var moveDown = function (dist, character) {
+        var moveDown = function (step) {
           console.log('Animation Played: Move Down')
-          character.style.top = parseFloat(getComputedStyle(character).top) + dist + 'px'
-          console.log(character.style.top)
+          if (!debugMode) {
+            var count = 0
+            var yoffset = step / bps
+            move = setInterval(function () {
+              drawCharacter(count, 0, yoffset, walkimgs)
+              count++
+            }, walk / bps)
+          }
+        }
+        var attack = function () {
+          console.log('Animation Played: Attack')
+          if (!debugMode) {
+            var count = 0
+            move = setInterval(function () {
+              drawCharacter(count, 0, 0, attackimgs)
+              count++
+            }, attackspeed / bps)
+          }
         }
         /**
          * Execute the animation given an action JSON object.
-         * @param actionObj
          */
-        var playAnimation = function (actionObj) {
-          var character = document.getElementById('doggy')
-          switch (actionObj.name) {
+        var playAnimation = function () {
+          var name = blockQueue.shift()
+          console.log('Play animation for ' + name)
+          switch (name) {
             case SupportedBlocks.MoveLeft:
-              moveLeft(100, character)
+              moveLeft(step)
               break
             case SupportedBlocks.MoveDown:
-              moveDown(100, character)
+              moveDown(step)
               break
             case SupportedBlocks.MoveUp:
-              moveUp(100, character)
+              moveUp(step)
               break
             case SupportedBlocks.MoveRight:
-              moveRight(100, character)
+              moveRight(step)
+              break
+            case SupportedBlocks.Attack:
+              attack()
               break
             case SupportedBlocks.Jump:
             case SupportedBlocks.Turn:
@@ -140,7 +331,13 @@
               case SupportedBlocks.MoveRight:
               case SupportedBlocks.Jump:
               case SupportedBlocks.Turn:
-                playAnimation(block)
+              case SupportedBlocks.Attack:
+                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                blockQueue.push(block.name)
+                setTimeout(function () {
+                  playAnimation()
+                }, delay)
+                delay += 1500
                 i++
                 break
               case SupportedBlocks.Else:
@@ -165,6 +362,11 @@
         let inStream = JSON.parse(this.instruction)
         if (inStream.length > 0) {
           executeInStream(inStream, 0)
+          setTimeout(function () {
+            for (var i = 1; i < 99999; i++) {
+              window.clearInterval(i)
+            }
+          }, 20000)
         }
       }
     }
@@ -212,13 +414,11 @@
     height: 100%;
   }
 
-  .character {
+  .canvas {
     position: absolute;
     left: 0%;
-    top: 60%;
-    z-index: -1;
-    width: 80px;
-    height: 60px;
-    transition-duration: 1s;
+    top: 0%;
+    height: 100%;
+    width: 100%;
   }
 </style>

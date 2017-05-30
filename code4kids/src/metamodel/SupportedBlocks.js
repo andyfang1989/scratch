@@ -9,5 +9,6 @@ export default {
   RepeatStart: 'RepeatStart',
   RepeatEnd: 'RepeatEnd',
   Jump: 'Jump',
-  Turn: 'Turn'
+  Turn: 'Turn',
+  Attack: 'Attack'
 }
