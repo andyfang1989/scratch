@@ -27,12 +27,14 @@
         instruction: '',
         result: '',
         currentX: 0,
-        currentY: 90,
+        currentY: 50,
         bps: 49,
         step: 50,
-        cWidth: 29,
-        cHeight: 39,
-        speedfast: 200,
+        pausetime: 500,
+        elapsetime: 1000,
+        cWidth: 100,
+        cHeight: 120,
+        speedfast: 400,
         speednormal: 800,
         attackspeed: 300,
         debugMode: false,
@@ -154,7 +156,11 @@
         var ch = this.cHeight
         var debugMode = this.debugMode
         var attackspeed = this.attackspeed
-        var walk = this.speednormal
+        var walkspeed = this.speednormal
+        var runspeed = this.speedfast
+        var pause = this.pausetime
+        var elapsetime = this.elapsetime
+
         var walkimgs = []
         for (var i = 0; i < this.walksprites.length; i++) {
           var img = new Image()
@@ -179,7 +185,7 @@
             cx += xoffset
             cy += yoffset
             console.log('Image Played: ' + sprites[count].src)
-            ctx.drawImage(sprites[count], 140, 110, 500, 600, cx, cy, cw, ch)
+            ctx.drawImage(sprites[count], 0, 0, 100, 120, cx, cy, cw, ch)
             console.log('Draw Once' + ' cx: ' + cx + ' cy: ' + cy)
           } else {
             clearInterval(move)
@@ -187,48 +193,105 @@
           }
         }
 
-        var moveRight = function (step) {
+        var addDelay = function (offset) {
+          delay += offset
+          delay += pause
+        }
+
+        var WalkRight = function (step) {
           console.log('Animation Played: Move Right')
           if (!debugMode) {
             var count = 0
             var xoffset = step / bps
             move = setInterval(function () {
               drawCharacter(count, xoffset, 0, walkimgs)
+              addDelay(walkspeed)
               count++
-            }, walk / bps)
+            }, walkspeed / bps)
           }
         }
-        var moveLeft = function (step) {
+        var WalkLeft = function (step) {
           console.log('Animation Played: Move Left')
           if (!debugMode) {
             var count = 0
             var xoffset = -step / bps
             move = setInterval(function () {
               drawCharacter(count, xoffset, 0, walkimgs)
+              addDelay(walkspeed)
               count++
-            }, walk / bps)
+            }, walkspeed / bps)
           }
         }
-        var moveUp = function (step) {
+        var WalkUp = function (step) {
           console.log('Animation Played: Move Up')
           if (!debugMode) {
             var count = 0
             var yoffset = -step / bps
             move = setInterval(function () {
               drawCharacter(count, 0, yoffset, walkimgs)
+              addDelay(walkspeed)
               count++
-            }, walk / bps)
+            }, walkspeed / bps)
           }
         }
-        var moveDown = function (step) {
+        var WalkDown = function (step) {
           console.log('Animation Played: Move Down')
           if (!debugMode) {
             var count = 0
             var yoffset = step / bps
             move = setInterval(function () {
               drawCharacter(count, 0, yoffset, walkimgs)
+              addDelay(walkspeed)
               count++
-            }, walk / bps)
+            }, walkspeed / bps)
+          }
+        }
+        var RunRight = function (step) {
+          console.log('Animation Played: Move Right')
+          if (!debugMode) {
+            var count = 0
+            var xoffset = step / bps
+            move = setInterval(function () {
+              drawCharacter(count, xoffset, 0, walkimgs)
+              addDelay(runspeed)
+              count++
+            }, runspeed / bps)
+          }
+        }
+        var RunLeft = function (step) {
+          console.log('Animation Played: Move Left')
+          if (!debugMode) {
+            var count = 0
+            var xoffset = -step / bps
+            move = setInterval(function () {
+              drawCharacter(count, xoffset, 0, walkimgs)
+              addDelay(runspeed)
+              count++
+            }, runspeed / bps)
+          }
+        }
+        var RunUp = function (step) {
+          console.log('Animation Played: Move Up')
+          if (!debugMode) {
+            var count = 0
+            var yoffset = -step / bps
+            move = setInterval(function () {
+              drawCharacter(count, 0, yoffset, walkimgs)
+              addDelay(runspeed)
+              count++
+            }, runspeed / bps)
+          }
+        }
+        var RunDown = function (step) {
+          console.log('Animation Played: Move Down')
+          if (!debugMode) {
+            var count = 0
+            var yoffset = step / bps
+            move = setInterval(function () {
+              drawCharacter(count, 0, yoffset, walkimgs)
+              addDelay(runspeed)
+              count++
+            }, runspeed / bps)
           }
         }
         var attack = function () {
@@ -237,6 +300,7 @@
             var count = 0
             move = setInterval(function () {
               drawCharacter(count, 0, 0, attackimgs)
+              addDelay(attackspeed)
               count++
             }, attackspeed / bps)
           }
@@ -248,17 +312,29 @@
           var name = blockQueue.shift()
           console.log('Play animation for ' + name)
           switch (name) {
-            case SupportedBlocks.MoveLeft:
-              moveLeft(step)
+            case SupportedBlocks.WalkLeft:
+              WalkLeft(step)
               break
-            case SupportedBlocks.MoveDown:
-              moveDown(step)
+            case SupportedBlocks.WalkDown:
+              WalkDown(step)
               break
-            case SupportedBlocks.MoveUp:
-              moveUp(step)
+            case SupportedBlocks.WalkUp:
+              WalkUp(step)
               break
-            case SupportedBlocks.MoveRight:
-              moveRight(step)
+            case SupportedBlocks.WalkRight:
+              WalkRight(step)
+              break
+            case SupportedBlocks.RunLeft:
+              RunLeft(step)
+              break
+            case SupportedBlocks.RunDown:
+              RunDown(step)
+              break
+            case SupportedBlocks.RunUp:
+              RunUp(step)
+              break
+            case SupportedBlocks.RunRight:
+              RunRight(step)
               break
             case SupportedBlocks.Attack:
               attack()
@@ -325,10 +401,14 @@
           while (i < len) {
             var block = stream[i]
             switch (block.name) {
-              case SupportedBlocks.MoveLeft:
-              case SupportedBlocks.MoveDown:
-              case SupportedBlocks.MoveUp:
-              case SupportedBlocks.MoveRight:
+              case SupportedBlocks.WalkLeft:
+              case SupportedBlocks.WalkDown:
+              case SupportedBlocks.WalkUp:
+              case SupportedBlocks.WalkRight:
+              case SupportedBlocks.RunLeft:
+              case SupportedBlocks.RunDown:
+              case SupportedBlocks.RunUp:
+              case SupportedBlocks.RunRight:
               case SupportedBlocks.Jump:
               case SupportedBlocks.Turn:
               case SupportedBlocks.Attack:
@@ -366,7 +446,8 @@
             for (var i = 1; i < 99999; i++) {
               window.clearInterval(i)
             }
-          }, 20000)
+            ctx.clearRect(cx, cy, cw, ch)
+          }, delay + elapsetime)
         }
       }
     }
