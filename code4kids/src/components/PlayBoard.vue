@@ -11,8 +11,8 @@
       <p>{{ result }}</p>
     </div>
     <div id="animation-container" class="animation-container">
-      <img src="../assets/backgrounds/dog-park.png" class="animation-background">
-      <canvas id="knight" class="canvas"></canvas>
+      <img id = "background" src="../assets/backgrounds/dog-park.png" class="animation-background">
+      <canvas id="knight" class="canvas" width="1000" height="800"></canvas>
     </div>
   </div>
 </template>
@@ -27,13 +27,14 @@
         instruction: '',
         result: '',
         currentX: 0,
-        currentY: 50,
+        currentY: 300,
         bps: 49,
-        step: 50,
+        step: 100,
         pausetime: 500,
         elapsetime: 1000,
-        cWidth: 100,
-        cHeight: 120,
+        cWidth: 500,
+        cHeight: 600,
+        cScale: 0.5,
         speedfast: 400,
         speednormal: 800,
         attackspeed: 300,
@@ -143,7 +144,35 @@
         ]
       }
     },
+    mounted: function () {
+      this.$nextTick(function () {
+        console.log('Mounted method called')
+        this.initLoading()
+      })
+    },
     methods: {
+      /**
+       * Init loading of the board.
+       */
+      initLoading () {
+        var background = document.getElementById('background')
+        var c = document.getElementById('knight')
+        console.log('Set canvas size as width = ' + background.width + ' and height = ' + background.height)
+        c.width = background.width
+        c.height = background.height
+        var ctx = c.getContext('2d')
+        var img = new Image()
+        var w = this.cWidth
+        var h = this.cHeight
+        var cx = this.currentX
+        var cy = this.currentY
+        var cScale = this.cScale
+        img.onload = function () {
+          console.log('Init loading: ' + img.src + ' at location: x = ' + cx + ' and y = ' + cy)
+          ctx.drawImage(img, 0, 0, w, h, cx, cy, w * cScale, h * cScale)
+        }
+        img.src = this.initSprite
+      },
       /**
        * Execute the animation given an array of instructions.
        */
@@ -160,6 +189,8 @@
         var runspeed = this.speedfast
         var pause = this.pausetime
         var elapsetime = this.elapsetime
+        var cScale = this.cScale
+        var initLoading = this.initLoading
 
         var walkimgs = []
         for (var i = 0; i < this.walksprites.length; i++) {
@@ -174,6 +205,7 @@
           attackimgs.push(img)
         }
         var c = document.getElementById('knight')
+        console.log('Canvas size: width = ' + c.width + ' height = ' + c.height)
         var move
         var delay = 0
         var blockQueue = []
@@ -185,7 +217,7 @@
             cx += xoffset
             cy += yoffset
             console.log('Image Played: ' + sprites[count].src)
-            ctx.drawImage(sprites[count], 0, 0, 100, 120, cx, cy, cw, ch)
+            ctx.drawImage(sprites[count], 0, 0, cw, ch, cx, cy, cw * cScale, ch * cScale)
             console.log('Draw Once' + ' cx: ' + cx + ' cy: ' + cy)
           } else {
             clearInterval(move)
@@ -447,7 +479,8 @@
               window.clearInterval(i)
             }
             ctx.clearRect(cx, cy, cw, ch)
-          }, delay + elapsetime)
+            initLoading()
+          }, delay + elapsetime, this.initLoading())
         }
       }
     }
@@ -470,19 +503,19 @@
     top: 0%;
     z-index: -1;
     height: 100%;
-    width: 20%;
+    width: 10%;
   }
 
   .dev-block-flow-text-area {
     width: 100%;
-    height: 80%;
+    height: 100%;
   }
 
   .animation-container {
     position: absolute;
-    left: 22%;
+    left: 10%;
     top: 0%;
-    width: 78%;
+    width: 90%;
     height: 100%;
   }
 
@@ -499,7 +532,6 @@
     position: absolute;
     left: 0%;
     top: 0%;
-    height: 100%;
-    width: 100%;
+    margin:0px;
   }
 </style>
