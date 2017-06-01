@@ -11,7 +11,7 @@
       <p>{{ result }}</p>
     </div>
     <div id="animation-container" class="animation-container">
-      <img id = "background" src="../assets/backgrounds/dog-park.png" class="animation-background">
+      <img id="background" src="../assets/backgrounds/dog-park.png" class="animation-background">
       <canvas id="knight" class="canvas" width="1000" height="800"></canvas>
     </div>
   </div>
@@ -32,12 +32,13 @@
         step: 100,
         pausetime: 500,
         elapsetime: 1000,
-        cWidth: 500,
-        cHeight: 600,
-        cScale: 0.5,
+        cWidth: 300,
+        cHeight: 300,
+        cScale: 1,
         speedfast: 400,
         speednormal: 800,
         attackspeed: 300,
+        turnspeed: 300,
         debugMode: false,
         initSprite: 'static/images/knight/walk/walk_0000.png',
         walksprites: [
@@ -91,6 +92,108 @@
           'static/images/knight/walk/walk_0047.png',
           'static/images/knight/walk/walk_0048.png'
         ],
+        walkbackwardsprites: [
+          'static/images/knight/walk-backward/walk-backward_0000.png',
+          'static/images/knight/walk-backward/walk-backward_0001.png',
+          'static/images/knight/walk-backward/walk-backward_0002.png',
+          'static/images/knight/walk-backward/walk-backward_0003.png',
+          'static/images/knight/walk-backward/walk-backward_0004.png',
+          'static/images/knight/walk-backward/walk-backward_0005.png',
+          'static/images/knight/walk-backward/walk-backward_0006.png',
+          'static/images/knight/walk-backward/walk-backward_0007.png',
+          'static/images/knight/walk-backward/walk-backward_0008.png',
+          'static/images/knight/walk-backward/walk-backward_0009.png',
+          'static/images/knight/walk-backward/walk-backward_0010.png',
+          'static/images/knight/walk-backward/walk-backward_0011.png',
+          'static/images/knight/walk-backward/walk-backward_0012.png',
+          'static/images/knight/walk-backward/walk-backward_0013.png',
+          'static/images/knight/walk-backward/walk-backward_0014.png',
+          'static/images/knight/walk-backward/walk-backward_0015.png',
+          'static/images/knight/walk-backward/walk-backward_0016.png',
+          'static/images/knight/walk-backward/walk-backward_0017.png',
+          'static/images/knight/walk-backward/walk-backward_0018.png',
+          'static/images/knight/walk-backward/walk-backward_0019.png',
+          'static/images/knight/walk-backward/walk-backward_0020.png',
+          'static/images/knight/walk-backward/walk-backward_0021.png',
+          'static/images/knight/walk-backward/walk-backward_0022.png',
+          'static/images/knight/walk-backward/walk-backward_0023.png',
+          'static/images/knight/walk-backward/walk-backward_0024.png',
+          'static/images/knight/walk-backward/walk-backward_0025.png',
+          'static/images/knight/walk-backward/walk-backward_0026.png',
+          'static/images/knight/walk-backward/walk-backward_0027.png',
+          'static/images/knight/walk-backward/walk-backward_0028.png',
+          'static/images/knight/walk-backward/walk-backward_0029.png',
+          'static/images/knight/walk-backward/walk-backward_0030.png',
+          'static/images/knight/walk-backward/walk-backward_0031.png',
+          'static/images/knight/walk-backward/walk-backward_0032.png',
+          'static/images/knight/walk-backward/walk-backward_0033.png',
+          'static/images/knight/walk-backward/walk-backward_0034.png',
+          'static/images/knight/walk-backward/walk-backward_0035.png',
+          'static/images/knight/walk-backward/walk-backward_0036.png',
+          'static/images/knight/walk-backward/walk-backward_0037.png',
+          'static/images/knight/walk-backward/walk-backward_0038.png',
+          'static/images/knight/walk-backward/walk-backward_0039.png',
+          'static/images/knight/walk-backward/walk-backward_0040.png',
+          'static/images/knight/walk-backward/walk-backward_0041.png',
+          'static/images/knight/walk-backward/walk-backward_0042.png',
+          'static/images/knight/walk-backward/walk-backward_0043.png',
+          'static/images/knight/walk-backward/walk-backward_0044.png',
+          'static/images/knight/walk-backward/walk-backward_0045.png',
+          'static/images/knight/walk-backward/walk-backward_0046.png',
+          'static/images/knight/walk-backward/walk-backward_0047.png',
+          'static/images/knight/walk-backward/walk-backward_0048.png'
+        ],
+        attackbackwardsprites: [
+          'static/images/knight/attack-backward/attack-backward_0000.png',
+          'static/images/knight/attack-backward/attack-backward_0001.png',
+          'static/images/knight/attack-backward/attack-backward_0002.png',
+          'static/images/knight/attack-backward/attack-backward_0003.png',
+          'static/images/knight/attack-backward/attack-backward_0004.png',
+          'static/images/knight/attack-backward/attack-backward_0005.png',
+          'static/images/knight/attack-backward/attack-backward_0006.png',
+          'static/images/knight/attack-backward/attack-backward_0007.png',
+          'static/images/knight/attack-backward/attack-backward_0008.png',
+          'static/images/knight/attack-backward/attack-backward_0009.png',
+          'static/images/knight/attack-backward/attack-backward_0010.png',
+          'static/images/knight/attack-backward/attack-backward_0011.png',
+          'static/images/knight/attack-backward/attack-backward_0012.png',
+          'static/images/knight/attack-backward/attack-backward_0013.png',
+          'static/images/knight/attack-backward/attack-backward_0014.png',
+          'static/images/knight/attack-backward/attack-backward_0015.png',
+          'static/images/knight/attack-backward/attack-backward_0016.png',
+          'static/images/knight/attack-backward/attack-backward_0017.png',
+          'static/images/knight/attack-backward/attack-backward_0018.png',
+          'static/images/knight/attack-backward/attack-backward_0019.png',
+          'static/images/knight/attack-backward/attack-backward_0020.png',
+          'static/images/knight/attack-backward/attack-backward_0021.png',
+          'static/images/knight/attack-backward/attack-backward_0022.png',
+          'static/images/knight/attack-backward/attack-backward_0023.png',
+          'static/images/knight/attack-backward/attack-backward_0024.png',
+          'static/images/knight/attack-backward/attack-backward_0025.png',
+          'static/images/knight/attack-backward/attack-backward_0026.png',
+          'static/images/knight/attack-backward/attack-backward_0027.png',
+          'static/images/knight/attack-backward/attack-backward_0028.png',
+          'static/images/knight/attack-backward/attack-backward_0029.png',
+          'static/images/knight/attack-backward/attack-backward_0030.png',
+          'static/images/knight/attack-backward/attack-backward_0031.png',
+          'static/images/knight/attack-backward/attack-backward_0032.png',
+          'static/images/knight/attack-backward/attack-backward_0033.png',
+          'static/images/knight/attack-backward/attack-backward_0034.png',
+          'static/images/knight/attack-backward/attack-backward_0035.png',
+          'static/images/knight/attack-backward/attack-backward_0036.png',
+          'static/images/knight/attack-backward/attack-backward_0037.png',
+          'static/images/knight/attack-backward/attack-backward_0038.png',
+          'static/images/knight/attack-backward/attack-backward_0039.png',
+          'static/images/knight/attack-backward/attack-backward_0040.png',
+          'static/images/knight/attack-backward/attack-backward_0041.png',
+          'static/images/knight/attack-backward/attack-backward_0042.png',
+          'static/images/knight/attack-backward/attack-backward_0043.png',
+          'static/images/knight/attack-backward/attack-backward_0044.png',
+          'static/images/knight/attack-backward/attack-backward_0045.png',
+          'static/images/knight/attack-backward/attack-backward_0046.png',
+          'static/images/knight/attack-backward/attack-backward_0047.png',
+          'static/images/knight/attack-backward/attack-backward_0048.png'
+        ],
         attacksprites: [
           'static/images/knight/attack/attack_0000.png',
           'static/images/knight/attack/attack_0001.png',
@@ -141,6 +244,57 @@
           'static/images/knight/attack/attack_0046.png',
           'static/images/knight/attack/attack_0047.png',
           'static/images/knight/attack/attack_0048.png'
+        ],
+        turnfromrightsprites: [
+          'static/images/knight/turn/turn_0000.png',
+          'static/images/knight/turn/turn_0001.png',
+          'static/images/knight/turn/turn_0002.png',
+          'static/images/knight/turn/turn_0003.png',
+          'static/images/knight/turn/turn_0004.png',
+          'static/images/knight/turn/turn_0005.png',
+          'static/images/knight/turn/turn_0006.png',
+          'static/images/knight/turn/turn_0007.png',
+          'static/images/knight/turn/turn_0008.png',
+          'static/images/knight/turn/turn_0009.png',
+          'static/images/knight/turn/turn_0010.png',
+          'static/images/knight/turn/turn_0011.png',
+          'static/images/knight/turn/turn_0012.png',
+          'static/images/knight/turn/turn_0013.png',
+          'static/images/knight/turn/turn_0014.png',
+          'static/images/knight/turn/turn_0015.png',
+          'static/images/knight/turn/turn_0016.png',
+          'static/images/knight/turn/turn_0017.png',
+          'static/images/knight/turn/turn_0018.png',
+          'static/images/knight/turn/turn_0019.png',
+          'static/images/knight/turn/turn_0020.png',
+          'static/images/knight/turn/turn_0021.png',
+          'static/images/knight/turn/turn_0022.png',
+          'static/images/knight/turn/turn_0023.png',
+          'static/images/knight/turn/turn_0024.png',
+          'static/images/knight/turn/turn_0025.png',
+          'static/images/knight/turn/turn_0026.png',
+          'static/images/knight/turn/turn_0027.png',
+          'static/images/knight/turn/turn_0028.png',
+          'static/images/knight/turn/turn_0029.png',
+          'static/images/knight/turn/turn_0030.png',
+          'static/images/knight/turn/turn_0031.png',
+          'static/images/knight/turn/turn_0032.png',
+          'static/images/knight/turn/turn_0033.png',
+          'static/images/knight/turn/turn_0034.png',
+          'static/images/knight/turn/turn_0035.png',
+          'static/images/knight/turn/turn_0036.png',
+          'static/images/knight/turn/turn_0037.png',
+          'static/images/knight/turn/turn_0038.png',
+          'static/images/knight/turn/turn_0039.png',
+          'static/images/knight/turn/turn_0040.png',
+          'static/images/knight/turn/turn_0041.png',
+          'static/images/knight/turn/turn_0042.png',
+          'static/images/knight/turn/turn_0043.png',
+          'static/images/knight/turn/turn_0044.png',
+          'static/images/knight/turn/turn_0045.png',
+          'static/images/knight/turn/turn_0046.png',
+          'static/images/knight/turn/turn_0047.png',
+          'static/images/knight/turn/turn_0048.png'
         ]
       }
     },
@@ -187,9 +341,12 @@
         var attackspeed = this.attackspeed
         var walkspeed = this.speednormal
         var runspeed = this.speedfast
+        var turnspeed = this.turnspeed
         var pause = this.pausetime
         var elapsetime = this.elapsetime
         var cScale = this.cScale
+        var faceRight = true
+        var drawfinished = true
         var initLoading = this.initLoading
 
         var walkimgs = []
@@ -198,11 +355,31 @@
           img.src = this.walksprites[i]
           walkimgs.push(img)
         }
+        var walkbackwardimgs = []
+        for (i = 0; i < this.walkbackwardsprites.length; i++) {
+          img = new Image()
+          img.src = this.walkbackwardsprites[i]
+          walkbackwardimgs.push(img)
+        }
         var attackimgs = []
         for (i = 0; i < this.attacksprites.length; i++) {
           img = new Image()
           img.src = this.attacksprites[i]
           attackimgs.push(img)
+        }
+        var attackbackwardimgs = []
+        for (i = 0; i < this.attackbackwardsprites.length; i++) {
+          img = new Image()
+          img.src = this.attackbackwardsprites[i]
+          attackbackwardimgs.push(img)
+        }
+        var turnfromrightimgs = []
+        var turnfromleftimgs = []
+        for (i = 0; i < this.turnfromrightsprites.length; i++) {
+          img = new Image()
+          img.src = this.turnfromrightsprites[i]
+          turnfromrightimgs.push(img)
+          turnfromleftimgs.unshift(img)
         }
         var c = document.getElementById('knight')
         console.log('Canvas size: width = ' + c.width + ' height = ' + c.height)
@@ -221,6 +398,7 @@
             console.log('Draw Once' + ' cx: ' + cx + ' cy: ' + cy)
           } else {
             clearInterval(move)
+            drawfinished = true
             console.log('Move interval end.')
           }
         }
@@ -229,15 +407,30 @@
           delay += offset
           delay += pause
         }
-
+        var Turn = function () {
+          console.log('Animation Played: Turn')
+          if (!debugMode) {
+            var count = 0
+            drawfinished = false
+            move = setInterval(function () {
+              drawCharacter(count, 0, 0, faceRight ? turnfromrightimgs : turnfromleftimgs)
+              count++
+            }, turnspeed / bps)
+            var reverseFace = setInterval(function () {
+              if (drawfinished) {
+                faceRight = !faceRight
+                clearInterval(reverseFace)
+              }
+            }, 100)
+          }
+        }
         var WalkRight = function (step) {
           console.log('Animation Played: Move Right')
           if (!debugMode) {
             var count = 0
             var xoffset = step / bps
             move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, walkimgs)
-              addDelay(walkspeed)
+              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, walkspeed / bps)
           }
@@ -248,8 +441,7 @@
             var count = 0
             var xoffset = -step / bps
             move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, walkimgs)
-              addDelay(walkspeed)
+              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, walkspeed / bps)
           }
@@ -260,8 +452,7 @@
             var count = 0
             var yoffset = -step / bps
             move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, walkimgs)
-              addDelay(walkspeed)
+              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, walkspeed / bps)
           }
@@ -272,8 +463,7 @@
             var count = 0
             var yoffset = step / bps
             move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, walkimgs)
-              addDelay(walkspeed)
+              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, walkspeed / bps)
           }
@@ -284,8 +474,7 @@
             var count = 0
             var xoffset = step / bps
             move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, walkimgs)
-              addDelay(runspeed)
+              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, runspeed / bps)
           }
@@ -296,8 +485,7 @@
             var count = 0
             var xoffset = -step / bps
             move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, walkimgs)
-              addDelay(runspeed)
+              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, runspeed / bps)
           }
@@ -308,8 +496,7 @@
             var count = 0
             var yoffset = -step / bps
             move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, walkimgs)
-              addDelay(runspeed)
+              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, runspeed / bps)
           }
@@ -320,8 +507,7 @@
             var count = 0
             var yoffset = step / bps
             move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, walkimgs)
-              addDelay(runspeed)
+              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
               count++
             }, runspeed / bps)
           }
@@ -331,8 +517,7 @@
           if (!debugMode) {
             var count = 0
             move = setInterval(function () {
-              drawCharacter(count, 0, 0, attackimgs)
-              addDelay(attackspeed)
+              drawCharacter(count, 0, 0, faceRight ? attackimgs : attackbackwardimgs)
               count++
             }, attackspeed / bps)
           }
@@ -371,8 +556,10 @@
             case SupportedBlocks.Attack:
               attack()
               break
-            case SupportedBlocks.Jump:
             case SupportedBlocks.Turn:
+              Turn()
+              break
+            case SupportedBlocks.Jump:
               break
           }
         }
@@ -437,19 +624,43 @@
               case SupportedBlocks.WalkDown:
               case SupportedBlocks.WalkUp:
               case SupportedBlocks.WalkRight:
+                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                blockQueue.push(block.name)
+                setTimeout(function () {
+                  playAnimation()
+                }, delay)
+                addDelay(walkspeed)
+                i++
+                break
               case SupportedBlocks.RunLeft:
               case SupportedBlocks.RunDown:
               case SupportedBlocks.RunUp:
               case SupportedBlocks.RunRight:
+                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                blockQueue.push(block.name)
+                setTimeout(function () {
+                  playAnimation()
+                }, delay)
+                addDelay(runspeed)
+                i++
+                break
               case SupportedBlocks.Jump:
               case SupportedBlocks.Turn:
+                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                blockQueue.push(block.name)
+                setTimeout(function () {
+                  playAnimation()
+                }, delay)
+                addDelay(turnspeed)
+                i++
+                break
               case SupportedBlocks.Attack:
                 console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
                 blockQueue.push(block.name)
                 setTimeout(function () {
                   playAnimation()
                 }, delay)
-                delay += 1500
+                addDelay(attackspeed)
                 i++
                 break
               case SupportedBlocks.Else:
@@ -503,7 +714,7 @@
     top: 0%;
     z-index: -1;
     height: 100%;
-    width: 10%;
+    width: 30%;
   }
 
   .dev-block-flow-text-area {
@@ -513,9 +724,9 @@
 
   .animation-container {
     position: absolute;
-    left: 10%;
+    left: 30%;
     top: 0%;
-    width: 90%;
+    width: 70%;
     height: 100%;
   }
 
@@ -532,6 +743,5 @@
     position: absolute;
     left: 0%;
     top: 0%;
-    margin:0px;
   }
 </style>
