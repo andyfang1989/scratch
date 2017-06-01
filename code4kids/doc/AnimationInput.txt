@@ -133,8 +133,10 @@ Command Dev Test Commands:
   {"name":"WalkRight"},
   {"name":"Attack"},
   {"name":"RepeatStart",
-   "count":2},
+   "count":3},
   {"name":"WalkRight"},
+  {"name":"Turn"},
+  {"name":"Attack"},
   {"name":"RepeatEnd"},
   {"name":"WalkLeft"},
   {"name":"WalkUp"},
@@ -142,6 +144,5 @@ Command Dev Test Commands:
   {"name":"RunRight"},
   {"name":"RunLeft"},
   {"name":"RunUp"},
-  {"name":"RunDown"},
-  {"name":"Attack"}
+  {"name":"RunDown"}
 ]
