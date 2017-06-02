@@ -11,8 +11,8 @@
       <p>{{ result }}</p>
     </div>
     <div id="animation-container" class="animation-container">
-      <img id="background" src="../assets/backgrounds/dog-park.png" class="animation-background">
-      <canvas id="knight" class="canvas" width="1000" height="800"></canvas>
+      <img id="background" :src="background_image" class="animation-background">
+      <canvas id="character" class="canvas" width="1000" height="800"></canvas>
     </div>
   </div>
 </template>
@@ -26,22 +26,24 @@
       return {
         instruction: '',
         result: '',
-        currentX: 0,
-        currentY: 300,
-        bps: 49,
-        step: 100,
-        pausetime: 500,
-        elapsetime: 1000,
+        startX: 0,
+        startY: 400,
+        image_stream_size: 49,
+        step_length: 100,
+        actionInterval: 500,
+        elapse_time: 1000,
         cWidth: 300,
         cHeight: 300,
         cScale: 1,
-        speedfast: 400,
-        speednormal: 800,
-        attackspeed: 300,
-        turnspeed: 300,
-        debugMode: false,
-        initSprite: 'static/images/knight/walk/walk_0000.png',
-        walksprites: [
+        run_speed: 400,
+        walk_speed: 800,
+        attack_speed: 300,
+        turn_speed: 300,
+        debug_mode: false,
+        background_image: '../../static/images/knight/background/knight-bg1.jpg',
+        cSprite: 'static/images/knight/walk/walk_0000.png',
+        shadowSprite: 'static/images/knight/shadow/shadow.png',
+        walk_sprites: [
           'static/images/knight/walk/walk_0000.png',
           'static/images/knight/walk/walk_0001.png',
           'static/images/knight/walk/walk_0002.png',
@@ -92,7 +94,7 @@
           'static/images/knight/walk/walk_0047.png',
           'static/images/knight/walk/walk_0048.png'
         ],
-        walkbackwardsprites: [
+        walk_backward_sprites: [
           'static/images/knight/walk-backward/walk-backward_0000.png',
           'static/images/knight/walk-backward/walk-backward_0001.png',
           'static/images/knight/walk-backward/walk-backward_0002.png',
@@ -143,7 +145,7 @@
           'static/images/knight/walk-backward/walk-backward_0047.png',
           'static/images/knight/walk-backward/walk-backward_0048.png'
         ],
-        attackbackwardsprites: [
+        attack_backward_sprites: [
           'static/images/knight/attack-backward/attack-backward_0000.png',
           'static/images/knight/attack-backward/attack-backward_0001.png',
           'static/images/knight/attack-backward/attack-backward_0002.png',
@@ -194,7 +196,7 @@
           'static/images/knight/attack-backward/attack-backward_0047.png',
           'static/images/knight/attack-backward/attack-backward_0048.png'
         ],
-        attacksprites: [
+        attack_sprites: [
           'static/images/knight/attack/attack_0000.png',
           'static/images/knight/attack/attack_0001.png',
           'static/images/knight/attack/attack_0002.png',
@@ -245,7 +247,7 @@
           'static/images/knight/attack/attack_0047.png',
           'static/images/knight/attack/attack_0048.png'
         ],
-        turnfromrightsprites: [
+        turn_left_sprites: [
           'static/images/knight/turn/turn_0000.png',
           'static/images/knight/turn/turn_0001.png',
           'static/images/knight/turn/turn_0002.png',
@@ -310,216 +312,232 @@
        */
       initLoading () {
         var background = document.getElementById('background')
-        var c = document.getElementById('knight')
+        var mainCharacterCanvas = document.getElementById('character')
         console.log('Set canvas size as width = ' + background.width + ' and height = ' + background.height)
-        c.width = background.width
-        c.height = background.height
-        var ctx = c.getContext('2d')
-        var img = new Image()
+        mainCharacterCanvas.width = background.width
+        mainCharacterCanvas.height = background.height
+        var ctx = mainCharacterCanvas.getContext('2d')
+        var cImg = new Image()
+        var shadowImg = new Image()
         var w = this.cWidth
         var h = this.cHeight
-        var cx = this.currentX
-        var cy = this.currentY
+        var cx = this.startX
+        var cy = this.startY
         var cScale = this.cScale
-        img.onload = function () {
-          console.log('Init loading: ' + img.src + ' at location: x = ' + cx + ' and y = ' + cy)
-          ctx.drawImage(img, 0, 0, w, h, cx, cy, w * cScale, h * cScale)
+        cImg.onload = function () {
+          console.log('Init loading: ' + cImg.src + ' at location: x = ' + cx + ' and y = ' + cy + ' image size: width = ' + cImg.width + ' height = ' + cImg.height)
+          ctx.drawImage(shadowImg, cx, cy, w * cScale, h * cScale)
+          ctx.drawImage(cImg, cx, cy, w * cScale, h * cScale)
         }
-        img.src = this.initSprite
+        cImg.src = this.cSprite
+        shadowImg.src = this.shadowSprite
       },
       /**
        * Execute the animation given an array of instructions.
        */
       runProgram (event) {
-        var cx = this.currentX
-        var cy = this.currentY
-        var bps = this.bps
-        var step = this.step
+        var cx = this.startX
+        var cy = this.startY
+        var imageStreamSize = this.image_stream_size
+        var stepLength = this.step_length
         var cw = this.cWidth
         var ch = this.cHeight
-        var debugMode = this.debugMode
-        var attackspeed = this.attackspeed
-        var walkspeed = this.speednormal
-        var runspeed = this.speedfast
-        var turnspeed = this.turnspeed
-        var pause = this.pausetime
-        var elapsetime = this.elapsetime
+        var debugMode = this.debug_mode
+        var attackSpeed = this.attack_speed
+        var walkSpeed = this.walk_speed
+        var runSpeed = this.run_speed
+        var turnSpeed = this.turn_speed
+        var actionInterval = this.actionInterval
+        var elapseTime = this.elapse_time
         var cScale = this.cScale
+        var shadowSprite = this.shadowSprite
         var faceRight = true
-        var drawfinished = true
-        var initLoading = this.initLoading
-
-        var walkimgs = []
-        for (var i = 0; i < this.walksprites.length; i++) {
-          var img = new Image()
-          img.src = this.walksprites[i]
-          walkimgs.push(img)
-        }
-        var walkbackwardimgs = []
-        for (i = 0; i < this.walkbackwardsprites.length; i++) {
+        var drawFinishedFlag = true
+        var initLoadingFunction = this.initLoading
+        var shadowImages = []
+        var img = new Image()
+        img.src = shadowSprite
+        shadowImages.push(img)
+        var walkImages = []
+        for (var i = 0; i < this.walk_sprites.length; i++) {
           img = new Image()
-          img.src = this.walkbackwardsprites[i]
-          walkbackwardimgs.push(img)
+          img.src = this.walk_sprites[i]
+          walkImages.push(img)
         }
-        var attackimgs = []
-        for (i = 0; i < this.attacksprites.length; i++) {
+        var walkBackwardImages = []
+        for (i = 0; i < this.walk_backward_sprites.length; i++) {
           img = new Image()
-          img.src = this.attacksprites[i]
-          attackimgs.push(img)
+          img.src = this.walk_backward_sprites[i]
+          walkBackwardImages.push(img)
         }
-        var attackbackwardimgs = []
-        for (i = 0; i < this.attackbackwardsprites.length; i++) {
+        var attackImages = []
+        for (i = 0; i < this.attack_sprites.length; i++) {
           img = new Image()
-          img.src = this.attackbackwardsprites[i]
-          attackbackwardimgs.push(img)
+          img.src = this.attack_sprites[i]
+          attackImages.push(img)
         }
-        var turnfromrightimgs = []
-        var turnfromleftimgs = []
-        for (i = 0; i < this.turnfromrightsprites.length; i++) {
+        var attackBackwardImages = []
+        for (i = 0; i < this.attack_backward_sprites.length; i++) {
           img = new Image()
-          img.src = this.turnfromrightsprites[i]
-          turnfromrightimgs.push(img)
-          turnfromleftimgs.unshift(img)
+          img.src = this.attack_backward_sprites[i]
+          attackBackwardImages.push(img)
         }
-        var c = document.getElementById('knight')
-        console.log('Canvas size: width = ' + c.width + ' height = ' + c.height)
-        var move
-        var delay = 0
+        var turnLeftImages = []
+        var turnRightImages = []
+        for (i = 0; i < this.turn_left_sprites.length; i++) {
+          img = new Image()
+          img.src = this.turn_left_sprites[i]
+          turnLeftImages.push(img)
+          turnRightImages.unshift(img)
+        }
+        var mainCharacterCanvas = document.getElementById('character')
+        console.log('Canvas size: width = ' + mainCharacterCanvas.width + ' height = ' + mainCharacterCanvas.height)
+        var actionIntervalId
+        var animationDelay = 0
         var blockQueue = []
-        var ctx = c.getContext('2d')
+        var ctx = mainCharacterCanvas.getContext('2d')
 
-        var drawCharacter = function (count, xoffset, yoffset, sprites) {
-          if (count < bps) {
+        var roundUpPosition = function () {
+          cx = Math.round(cx)
+          cy = Math.round(cy)
+        }
+        var drawCharacter = function (count, xOffset, yOffset, sprites, shadow) {
+          if (count < imageStreamSize) {
             ctx.clearRect(cx, cy, cw, ch)
-            cx += xoffset
-            cy += yoffset
-            console.log('Image Played: ' + sprites[count].src)
-            ctx.drawImage(sprites[count], 0, 0, cw, ch, cx, cy, cw * cScale, ch * cScale)
-            console.log('Draw Once' + ' cx: ' + cx + ' cy: ' + cy)
+            cx += xOffset
+            cy += yOffset
+            ctx.drawImage(shadow, cx, cy, cw * cScale, ch * cScale)
+            ctx.drawImage(sprites[count], cx, cy, cw * cScale, ch * cScale)
           } else {
-            clearInterval(move)
-            drawfinished = true
-            console.log('Move interval end.')
+            clearInterval(actionIntervalId)
+            drawFinishedFlag = true
+            roundUpPosition()
+            console.log('Move interval end with current position: ' + ' cx: ' + cx + ' cy: ' + cy)
           }
         }
 
-        var addDelay = function (offset) {
-          delay += offset
-          delay += pause
+        var addAnimationDelay = function (offset) {
+          animationDelay += offset
+          animationDelay += actionInterval
         }
-        var Turn = function () {
+
+        function endTurnAction () {
+          var reverseFace = setInterval(function () {
+            if (drawFinishedFlag) {
+              faceRight = !faceRight
+              clearInterval(reverseFace)
+            }
+          }, 100)
+        }
+
+        var MakeATurn = function () {
           console.log('Animation Played: Turn')
           if (!debugMode) {
             var count = 0
-            drawfinished = false
-            move = setInterval(function () {
-              drawCharacter(count, 0, 0, faceRight ? turnfromrightimgs : turnfromleftimgs)
+            drawFinishedFlag = false
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, 0, faceRight ? turnLeftImages : turnRightImages, shadowImages[0])
               count++
-            }, turnspeed / bps)
-            var reverseFace = setInterval(function () {
-              if (drawfinished) {
-                faceRight = !faceRight
-                clearInterval(reverseFace)
-              }
-            }, 100)
+            }, turnSpeed / imageStreamSize)
+            endTurnAction()
           }
         }
         var WalkRight = function (step) {
           console.log('Animation Played: Move Right')
           if (!debugMode) {
             var count = 0
-            var xoffset = step / bps
-            move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
+            var xoffset = step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, xoffset, 0, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, walkspeed / bps)
+            }, walkSpeed / imageStreamSize)
           }
         }
         var WalkLeft = function (step) {
           console.log('Animation Played: Move Left')
           if (!debugMode) {
             var count = 0
-            var xoffset = -step / bps
-            move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
+            var xoffset = -step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, xoffset, 0, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, walkspeed / bps)
+            }, walkSpeed / imageStreamSize)
           }
         }
         var WalkUp = function (step) {
           console.log('Animation Played: Move Up')
           if (!debugMode) {
             var count = 0
-            var yoffset = -step / bps
-            move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
+            var yoffset = -step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, yoffset, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, walkspeed / bps)
+            }, walkSpeed / imageStreamSize)
           }
         }
         var WalkDown = function (step) {
           console.log('Animation Played: Move Down')
           if (!debugMode) {
             var count = 0
-            var yoffset = step / bps
-            move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
+            var yoffset = step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, yoffset, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, walkspeed / bps)
+            }, walkSpeed / imageStreamSize)
           }
         }
         var RunRight = function (step) {
           console.log('Animation Played: Move Right')
           if (!debugMode) {
             var count = 0
-            var xoffset = step / bps
-            move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
+            var xoffset = step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, xoffset, 0, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, runspeed / bps)
+            }, runSpeed / imageStreamSize)
           }
         }
         var RunLeft = function (step) {
           console.log('Animation Played: Move Left')
           if (!debugMode) {
             var count = 0
-            var xoffset = -step / bps
-            move = setInterval(function () {
-              drawCharacter(count, xoffset, 0, faceRight ? walkimgs : walkbackwardimgs)
+            var xoffset = -step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, xoffset, 0, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, runspeed / bps)
+            }, runSpeed / imageStreamSize)
           }
         }
         var RunUp = function (step) {
           console.log('Animation Played: Move Up')
           if (!debugMode) {
             var count = 0
-            var yoffset = -step / bps
-            move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
+            var yoffset = -step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, yoffset, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, runspeed / bps)
+            }, runSpeed / imageStreamSize)
           }
         }
         var RunDown = function (step) {
           console.log('Animation Played: Move Down')
           if (!debugMode) {
             var count = 0
-            var yoffset = step / bps
-            move = setInterval(function () {
-              drawCharacter(count, 0, yoffset, faceRight ? walkimgs : walkbackwardimgs)
+            var yoffset = step / imageStreamSize
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, yoffset, faceRight ? walkImages : walkBackwardImages, shadowImages[0])
               count++
-            }, runspeed / bps)
+            }, runSpeed / imageStreamSize)
           }
         }
         var attack = function () {
           console.log('Animation Played: Attack')
           if (!debugMode) {
             var count = 0
-            move = setInterval(function () {
-              drawCharacter(count, 0, 0, faceRight ? attackimgs : attackbackwardimgs)
+            actionIntervalId = setInterval(function () {
+              drawCharacter(count, 0, 0, faceRight ? attackImages : attackBackwardImages, shadowImages[0])
               count++
-            }, attackspeed / bps)
+            }, attackSpeed / imageStreamSize)
           }
         }
         /**
@@ -530,34 +548,34 @@
           console.log('Play animation for ' + name)
           switch (name) {
             case SupportedBlocks.WalkLeft:
-              WalkLeft(step)
+              WalkLeft(stepLength)
               break
             case SupportedBlocks.WalkDown:
-              WalkDown(step)
+              WalkDown(stepLength)
               break
             case SupportedBlocks.WalkUp:
-              WalkUp(step)
+              WalkUp(stepLength)
               break
             case SupportedBlocks.WalkRight:
-              WalkRight(step)
+              WalkRight(stepLength)
               break
             case SupportedBlocks.RunLeft:
-              RunLeft(step)
+              RunLeft(stepLength)
               break
             case SupportedBlocks.RunDown:
-              RunDown(step)
+              RunDown(stepLength)
               break
             case SupportedBlocks.RunUp:
-              RunUp(step)
+              RunUp(stepLength)
               break
             case SupportedBlocks.RunRight:
-              RunRight(step)
+              RunRight(stepLength)
               break
             case SupportedBlocks.Attack:
               attack()
               break
             case SupportedBlocks.Turn:
-              Turn()
+              MakeATurn()
               break
             case SupportedBlocks.Jump:
               break
@@ -624,43 +642,43 @@
               case SupportedBlocks.WalkDown:
               case SupportedBlocks.WalkUp:
               case SupportedBlocks.WalkRight:
-                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                console.log('Current Delay: ' + animationDelay + ' With Index: ' + i + ' and Block: ' + block.name)
                 blockQueue.push(block.name)
                 setTimeout(function () {
                   playAnimation()
-                }, delay)
-                addDelay(walkspeed)
+                }, animationDelay)
+                addAnimationDelay(walkSpeed)
                 i++
                 break
               case SupportedBlocks.RunLeft:
               case SupportedBlocks.RunDown:
               case SupportedBlocks.RunUp:
               case SupportedBlocks.RunRight:
-                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                console.log('Current Delay: ' + animationDelay + ' With Index: ' + i + ' and Block: ' + block.name)
                 blockQueue.push(block.name)
                 setTimeout(function () {
                   playAnimation()
-                }, delay)
-                addDelay(runspeed)
+                }, animationDelay)
+                addAnimationDelay(runSpeed)
                 i++
                 break
               case SupportedBlocks.Jump:
               case SupportedBlocks.Turn:
-                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                console.log('Current Delay: ' + animationDelay + ' With Index: ' + i + ' and Block: ' + block.name)
                 blockQueue.push(block.name)
                 setTimeout(function () {
                   playAnimation()
-                }, delay)
-                addDelay(turnspeed)
+                }, animationDelay)
+                addAnimationDelay(turnSpeed)
                 i++
                 break
               case SupportedBlocks.Attack:
-                console.log('Current Delay: ' + delay + ' With Index: ' + i + ' and Block: ' + block.name)
+                console.log('Current Delay: ' + animationDelay + ' With Index: ' + i + ' and Block: ' + block.name)
                 blockQueue.push(block.name)
                 setTimeout(function () {
                   playAnimation()
-                }, delay)
-                addDelay(attackspeed)
+                }, animationDelay)
+                addAnimationDelay(attackSpeed)
                 i++
                 break
               case SupportedBlocks.Else:
@@ -690,8 +708,8 @@
               window.clearInterval(i)
             }
             ctx.clearRect(cx, cy, cw, ch)
-            initLoading()
-          }, delay + elapsetime, this.initLoading())
+            initLoadingFunction()
+          }, animationDelay + elapseTime, this.initLoading())
         }
       }
     }
@@ -741,7 +759,7 @@
 
   .canvas {
     position: absolute;
-    left: 0%;
-    top: 0%;
+    left: 0px;
+    top: 0px;
   }
 </style>
