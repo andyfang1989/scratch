@@ -157,7 +157,20 @@ Command Dev Test Commands:
   {"name":"Attack"},
   {"name":"RepeatEnd"},
   {"name":"RunRight"},
-  {"name":"RunUp"},
+  {"name":"RunDown"},
   {"name":"RunDown"},
   {"name":"Attack"}
+]
+
+4.
+[
+  {"name":"RepeatStart",
+   "count":8},
+  {"name":"RunRight"},
+  {"name":"RepeatEnd"},
+  {"name":"RepeatStart",
+   "count":2},
+  {"name":"RunDown"},
+  {"name":"RepeatEnd"},
+  {"name":"RunRight"}
 ]
