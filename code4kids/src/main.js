@@ -6,10 +6,12 @@ import router from './router'
 import PlayBoard from './components/PlayBoard.vue'
 import Blocks from './components/Blocks.vue'
 import FlowBoard from './components/FlowBoard.vue'
+import Modal from './components/Modal.vue'
 
 Vue.component('app-play-board', PlayBoard)
 Vue.component('app-blocks', Blocks)
 Vue.component('app-flow-board', FlowBoard)
+Vue.component('app-modal', Modal)
 
 Vue.config.productionTip = false
 

@@ -11,6 +11,11 @@
       <p>{{ initContext.result }}</p>
     </div>
     <div id="animation-container" class="animation-container">
+      <div id="animation-modal" class="popup">
+        <app-modal v-if="initContext.showModal" @close="initContext.initLoading()">
+          <h3 slot="body">{{initContext.finalStatus}}</h3>
+        </app-modal>
+      </div>
       <div v-for="bImage in initContext.background_images" class="animation-background">
         <img id="background" :src="bImage" class="animation-background">
       </div>
@@ -525,7 +530,7 @@
           items: [
             {
               image: '/static/images/knight/background/stone.png',
-              count: 25,
+              count: 30,
               random: true,
               scale: 1,
               coordinates: [],
@@ -538,8 +543,11 @@
             destinationXGrid: 8,
             destinationYGrid: 2
           },
-          endWithInitLoading: false,
+          showModal: false,
+          finalStatus: '',
           initLoading: function () {
+            this.showModal = false
+            this.finalStatus = ''
             let ctx
             const background = document.getElementById('background')
             const mainCharacterCanvas = document.getElementById('character')
@@ -619,9 +627,8 @@
                   let solvable = false
                   let xSize = this.grid_x
                   let ySize = this.grid_y
-                  let maxTry = 100
                   console.log('grid x size = ' + xSize + ' grid y size = ' + ySize + ' destination x = ' + dX + ' destination y = ' + dY)
-                  while (!solvable && maxTry > 0) {
+                  while (!solvable) {
                     item.coordinates = []
                     let currentCount = 0
                     let rx = 0
@@ -640,11 +647,6 @@
                     }
                     if (checkValid(rTrack, xSize, ySize, dX, dY)) {
                       solvable = true
-                    } else {
-                      maxTry--
-                      if (maxTry === 0) {
-                        console.log('Max try reached.')
-                      }
                     }
                   }
                 }
@@ -741,5 +743,12 @@
     position: absolute;
     left: 0;
     top: 0;
+  }
+  .popup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
   }
 </style>

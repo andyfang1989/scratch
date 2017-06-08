@@ -26,10 +26,7 @@ export default function play (animationContext) {
   const elapseTime = animationContext.elapse_time
   const cScale = animationContext.cScale
   const shadowSprite = animationContext.shadowSprite
-  const initLoadingFunction = animationContext.initLoading
   const maxSteps = animationContext.maxSteps
-  const endWithInitLoading = animationContext.endWithInitLoading
-  const failCondition = animationContext.failCondition
   const passCondition = animationContext.passCondition
   let items = animationContext.items
   let currentGridX = 0
@@ -191,7 +188,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Right')
     if (!debugMode) {
       if (isBlocked(1, 0)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let xOffset = step / imageStreamSize
@@ -209,7 +206,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Left')
     if (!debugMode) {
       if (isBlocked(-1, 0)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let xOffset = -step / imageStreamSize
@@ -227,7 +224,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Up')
     if (!debugMode) {
       if (isBlocked(0, -1)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let yOffset = -step / imageStreamSize
@@ -245,7 +242,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Down')
     if (!debugMode) {
       if (isBlocked(0, 1)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let yOffset = step / imageStreamSize
@@ -263,7 +260,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Right')
     if (!debugMode) {
       if (isBlocked(1, 0)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let xOffset = step / imageStreamSize
@@ -281,7 +278,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Left')
     if (!debugMode) {
       if (isBlocked(-1, 0)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let xOffset = -step / imageStreamSize
@@ -299,7 +296,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Up')
     if (!debugMode) {
       if (isBlocked(0, -1)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let yOffset = -step / imageStreamSize
@@ -317,7 +314,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Move Down')
     if (!debugMode) {
       if (isBlocked(0, 1)) {
-        failAction()
+        playFailure(true)
       } else {
         let count = 0
         let yOffset = step / imageStreamSize
@@ -346,6 +343,7 @@ export default function play (animationContext) {
     console.log('Animation Played: Victory')
     if (!debugMode) {
       let count = 0
+      addAnimationDelay(victorySpeed * 3)
       let actionIntervalId = setInterval(function () {
         drawCharacter(count, 0, 0, faceRight ? victoryImages : victoryBackwardImages, shadowImages[0], 3, false)
         count++
@@ -363,15 +361,16 @@ export default function play (animationContext) {
     actionIntervalIds.push(actionIntervalId)
   }
 
-  let failAction = function () {
+  let playFailure = function (failBeforeFinished) {
     console.log('Animation Played: Fail')
-    var lastIntervalId = setInterval(function () {}, 100)
+    let lastIntervalId = setInterval(function () {}, 100)
     while (lastIntervalId--) {
       window.clearInterval(lastIntervalId)
     }
 
     if (!debugMode) {
       let count = 0
+      let delayBefore = animationDelay + elapseTime
       addAnimationDelay(failSpeed)
       let actionIntervalId = setInterval(function () {
         drawCharacter(count, 0, 0, faceRight ? failImages : failBackwardImages, shadowImages[0], 1, false)
@@ -381,12 +380,29 @@ export default function play (animationContext) {
       let imagesToPlay = faceRight ? failImages.slice(23, 49) : failBackwardImages.slice(23, 49)
       let imagesToPlayReverse = faceRight ? failImages.slice(23, 49).reverse() : failBackwardImages.slice(23, 49).reverse()
       let timeToElapse = failSpeed
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 3; i++) {
         addAnimationDelay(failSpeed)
         setTimeout(function () {
           repeatFailing(i % 2 === 0 ? imagesToPlay : imagesToPlayReverse, 26, actionIntervalIds)
         }, timeToElapse)
         timeToElapse += failSpeed
+      }
+      if (failBeforeFinished) {
+        let extraDelay = animationDelay - delayBefore
+        console.log('Extra Delay: ' + extraDelay)
+        setTimeout(function () {
+          let lastIntervalId = setInterval(function () {}, 100)
+          while (lastIntervalId--) {
+            window.clearInterval(lastIntervalId)
+          }
+          let lastTimeoutId = window.setTimeout(function () {}, 0)
+          while (lastTimeoutId--) {
+            window.clearTimeout(lastTimeoutId)
+          }
+          ctx.clearRect(cx, cy, cw * cScale, ch * cScale)
+          animationContext.finalStatus = 'Try Again!'
+          animationContext.showModal = true
+        }, extraDelay)
       }
     }
   }
@@ -550,23 +566,17 @@ export default function play (animationContext) {
       }
     }
   }
-  var failConditionMatched = function () {
-    if (failCondition) {
-    }
-    return false
+
+  let passConditionMatched = function () {
+    return stepCount < maxSteps && currentGridX + '_' + currentGridY === passCondition.destinationXGrid + '_' + passCondition.destinationYGrid
   }
-  var passConditionMatched = function () {
-    if (currentGridX + '_' + currentGridY === passCondition.destinationXGrid + '_' + passCondition.destinationYGrid) {
-      return true
-    } else {
-      return false
-    }
-  }
-  var checkPassOrFail = function () {
-    if (stepCount > maxSteps || failConditionMatched()) {
-      failAction()
-    } else if (passConditionMatched()) {
+  let checkPassOrFail = function () {
+    if (passConditionMatched()) {
       victory()
+      animationContext.finalStatus = 'Congratulations!'
+    } else {
+      animationContext.finalStatus = 'Try Again!'
+      playFailure(false)
     }
   }
   // Main logic for runProgram
@@ -574,19 +584,22 @@ export default function play (animationContext) {
   if (inStream.length > 0) {
     executeInStream(inStream, 0)
     setTimeout(function () {
-      var lastIntervalId = setInterval(function () {}, 100)
-      while (lastIntervalId--) {
-        window.clearTimeout(lastIntervalId)
-      }
-      var lastTimeoutId = window.setTimeout(function () {}, 0)
-      while (lastTimeoutId--) {
-        window.clearTimeout(lastTimeoutId)
-      }
+      let delayBefore = animationDelay + elapseTime
       checkPassOrFail()
-      if (endWithInitLoading) {
-        ctx.clearRect(cx, cy, cw, ch)
-        initLoadingFunction.apply(animationContext)
-      }
+      let extraDelay = animationDelay - delayBefore
+      console.log('Extra Delay: ' + extraDelay)
+      setTimeout(function () {
+        let lastIntervalId = setInterval(function () {}, 100)
+        while (lastIntervalId--) {
+          window.clearInterval(lastIntervalId)
+        }
+        let lastTimeoutId = window.setTimeout(function () {}, 0)
+        while (lastTimeoutId--) {
+          window.clearTimeout(lastTimeoutId)
+        }
+        ctx.clearRect(cx, cy, cw * cScale, ch * cScale)
+        animationContext.showModal = true
+      }, extraDelay)
     }, animationDelay + elapseTime)
   }
 }
