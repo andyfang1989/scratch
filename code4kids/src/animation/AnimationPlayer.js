@@ -6,13 +6,13 @@ import SupportedBlocks from '../metamodel/SupportedBlocks.js'
 export default function play (animationContext) {
   let i
   let stepCount = 0
-  const gridX = animationContext.start_x
-  const gridY = animationContext.start_y
+  const gridX = animationContext.character_starting_x_in_pixel
+  const gridY = animationContext.character_starting_y_in_pixel
   const imageStreamSize = animationContext.image_stream_size
-  const stepX = animationContext.step_x
-  const stepY = animationContext.step_y
-  const cw = animationContext.cWidth
-  const ch = animationContext.cHeight
+  const stepX = animationContext.step_width_in_pixel
+  const stepY = animationContext.step_height_in_pixel
+  const cw = animationContext.character_width_in_pixel
+  const ch = animationContext.character_height_in_pixel
   let cx = gridX + Math.round(stepX / 2) - Math.round(cw / 2)
   let cy = gridY - ch
   let debugMode = animationContext.debug_mode
@@ -24,7 +24,6 @@ export default function play (animationContext) {
   const failSpeed = animationContext.fail_speed
   const actionInterval = animationContext.actionInterval
   const elapseTime = animationContext.elapse_time
-  const cScale = animationContext.cScale
   const shadowSprite = animationContext.shadowSprite
   const maxSteps = animationContext.maxSteps
   const passCondition = animationContext.passCondition
@@ -126,11 +125,11 @@ export default function play (animationContext) {
       ctx.clearRect(cx, cy, cw, ch)
       cx += xOffset
       cy += yOffset
-      ctx.drawImage(shadow, cx, cy, cw * cScale, ch * cScale)
+      ctx.drawImage(shadow, cx, cy, cw, ch)
       if (verbose === true) {
         console.log('Image printed: ' + sprites[count % sprites.length].src)
       }
-      ctx.drawImage(sprites[count % sprites.length], cx, cy, cw * cScale, ch * cScale)
+      ctx.drawImage(sprites[count % sprites.length], cx, cy, cw, ch)
     } else {
       clearInterval(actionIntervalIds.shift())
       drawFinishedFlag = true
@@ -377,13 +376,13 @@ export default function play (animationContext) {
         count++
       }, failSpeed / imageStreamSize)
       actionIntervalIds.push(actionIntervalId)
-      let imagesToPlay = faceRight ? failImages.slice(23, 49) : failBackwardImages.slice(23, 49)
-      let imagesToPlayReverse = faceRight ? failImages.slice(23, 49).reverse() : failBackwardImages.slice(23, 49).reverse()
+      let imagesToPlay = faceRight ? failImages.slice(6, 14) : failBackwardImages.slice(6, 14)
+      let imagesToPlayReverse = faceRight ? failImages.slice(6, 14).reverse() : failBackwardImages.slice(6, 14).reverse()
       let timeToElapse = failSpeed
       for (let i = 0; i < 3; i++) {
         addAnimationDelay(failSpeed)
         setTimeout(function () {
-          repeatFailing(i % 2 === 0 ? imagesToPlay : imagesToPlayReverse, 26, actionIntervalIds)
+          repeatFailing(i % 2 === 0 ? imagesToPlay : imagesToPlayReverse, 7, actionIntervalIds)
         }, timeToElapse)
         timeToElapse += failSpeed
       }
@@ -399,7 +398,7 @@ export default function play (animationContext) {
           while (lastTimeoutId--) {
             window.clearTimeout(lastTimeoutId)
           }
-          ctx.clearRect(cx, cy, cw * cScale, ch * cScale)
+          ctx.clearRect(cx, cy, cw, ch)
           animationContext.finalStatus = 'Try Again!'
           animationContext.showModal = true
         }, extraDelay)
@@ -597,7 +596,7 @@ export default function play (animationContext) {
         while (lastTimeoutId--) {
           window.clearTimeout(lastTimeoutId)
         }
-        ctx.clearRect(cx, cy, cw * cScale, ch * cScale)
+        ctx.clearRect(cx, cy, cw, ch)
         animationContext.showModal = true
       }, extraDelay)
     }, animationDelay + elapseTime)

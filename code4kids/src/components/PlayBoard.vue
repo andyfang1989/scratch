@@ -8,17 +8,19 @@
       <br>
       <p>Instruction: {{ initContext.instruction }}</p>
       <br>
-      <p>{{ initContext.result }}</p>
+      <p>{{ initContext.instructionDebugPrint }}</p>
     </div>
-    <div id="animation-container" class="animation-container">
+    <div id="loading" class="animation-container" v-if="!initContext.imageLoadingCompleted">
+      <h1>Loading</h1>
+    </div>
+    <div id="animation-container" class="animation-container" v-if="initContext.imageLoadingCompleted">
       <div id="animation-modal" class="popup">
         <app-modal v-if="initContext.showModal" @close="initContext.initLoading()">
           <h3 slot="body">{{initContext.finalStatus}}</h3>
         </app-modal>
       </div>
-      <div v-for="bImage in initContext.background_images" class="animation-background">
-        <img id="background" :src="bImage" class="animation-background">
-      </div>
+      <img id="background" :src="initContext.background_image" class="animation-background">
+      <canvas id="grid-board" class="canvas" width="1000" height="800"></canvas>
       <canvas id="items" class="canvas" width="1000" height="800"></canvas>
       <canvas id="character" class="canvas" width="1000" height="800"></canvas>
     </div>
@@ -34,25 +36,19 @@
       return {
         initContext: {
           instruction: '',
-          result: '',
-          start_x: 0,
-          start_y: 0,
-          step_x: 100,
-          step_y: 100,
-          grid_x: 10,
-          grid_y: 5,
-          character_start_ratio_x: 0,
-          character_start_ratio_y: 0.66,
-          grid_start_ratio_x: 0,
-          grid_start_ratio_y: 0.53,
-          image_stream_size: 49,
-          step_ratio_x: 0.1,
-          step_ratio_y: 0.077,
-          actionInterval: 500,
+          grid_x_size: 10,
+          grid_y_size: 5,
+          character_start_x_percentage: 0,
+          character_start_y_percentage: 0.53,
+          grid_board_top_left_x_percentage: 0,
+          grid_board_top_left_y_percentage: 0.4,
+          image_stream_size: 13,
+          step_x_percentage: 0.1,
+          step_y_percentage: 0.08,
+          actionInterval: 300,
           elapse_time: 1000,
-          cWidth: 300,
-          cHeight: 300,
-          cScale: 1,
+          character_width_in_pixel: 300,
+          character_height_in_pixel: 300,
           run_speed: 400,
           walk_speed: 800,
           attack_speed: 300,
@@ -60,471 +56,144 @@
           victory_speed: 1000,
           fail_speed: 1000,
           debug_mode: false,
-          background_images: [
-            '../../static/images/knight/background/knight-bg1.jpg',
-            '../../static/images/knight/background/knight-bg2.png'
-          ],
+          background_image: '../../static/images/knight/background/knight-bg.jpg',
           front_ground: 'static/images/knight/background/knight-fg.png',
-          cSprite: 'static/images/knight/walk/walk_0000.png',
+          character_sprite: 'static/images/knight/walk/walk_0000.png',
           shadowSprite: 'static/images/knight/shadow/shadow.png',
-          destinationSprite: 'static/images/knight/background/destination.png',
+          gridSprite: 'static/images/knight/background/grid.png',
           walk_sprites: [
             'static/images/knight/walk/walk_0000.png',
-            'static/images/knight/walk/walk_0001.png',
-            'static/images/knight/walk/walk_0002.png',
-            'static/images/knight/walk/walk_0003.png',
             'static/images/knight/walk/walk_0004.png',
-            'static/images/knight/walk/walk_0005.png',
-            'static/images/knight/walk/walk_0006.png',
-            'static/images/knight/walk/walk_0007.png',
             'static/images/knight/walk/walk_0008.png',
-            'static/images/knight/walk/walk_0009.png',
-            'static/images/knight/walk/walk_0010.png',
-            'static/images/knight/walk/walk_0011.png',
             'static/images/knight/walk/walk_0012.png',
-            'static/images/knight/walk/walk_0013.png',
-            'static/images/knight/walk/walk_0014.png',
-            'static/images/knight/walk/walk_0015.png',
             'static/images/knight/walk/walk_0016.png',
-            'static/images/knight/walk/walk_0017.png',
-            'static/images/knight/walk/walk_0018.png',
-            'static/images/knight/walk/walk_0019.png',
             'static/images/knight/walk/walk_0020.png',
-            'static/images/knight/walk/walk_0021.png',
-            'static/images/knight/walk/walk_0022.png',
-            'static/images/knight/walk/walk_0023.png',
             'static/images/knight/walk/walk_0024.png',
-            'static/images/knight/walk/walk_0025.png',
-            'static/images/knight/walk/walk_0026.png',
-            'static/images/knight/walk/walk_0027.png',
             'static/images/knight/walk/walk_0028.png',
-            'static/images/knight/walk/walk_0029.png',
-            'static/images/knight/walk/walk_0030.png',
-            'static/images/knight/walk/walk_0031.png',
             'static/images/knight/walk/walk_0032.png',
-            'static/images/knight/walk/walk_0033.png',
-            'static/images/knight/walk/walk_0034.png',
-            'static/images/knight/walk/walk_0035.png',
             'static/images/knight/walk/walk_0036.png',
-            'static/images/knight/walk/walk_0037.png',
-            'static/images/knight/walk/walk_0038.png',
-            'static/images/knight/walk/walk_0039.png',
             'static/images/knight/walk/walk_0040.png',
-            'static/images/knight/walk/walk_0041.png',
-            'static/images/knight/walk/walk_0042.png',
-            'static/images/knight/walk/walk_0043.png',
             'static/images/knight/walk/walk_0044.png',
-            'static/images/knight/walk/walk_0045.png',
-            'static/images/knight/walk/walk_0046.png',
-            'static/images/knight/walk/walk_0047.png',
             'static/images/knight/walk/walk_0048.png'
           ],
           walk_backward_sprites: [
             'static/images/knight/walk-backward/walk-backward_0000.png',
-            'static/images/knight/walk-backward/walk-backward_0001.png',
-            'static/images/knight/walk-backward/walk-backward_0002.png',
-            'static/images/knight/walk-backward/walk-backward_0003.png',
             'static/images/knight/walk-backward/walk-backward_0004.png',
-            'static/images/knight/walk-backward/walk-backward_0005.png',
-            'static/images/knight/walk-backward/walk-backward_0006.png',
-            'static/images/knight/walk-backward/walk-backward_0007.png',
             'static/images/knight/walk-backward/walk-backward_0008.png',
-            'static/images/knight/walk-backward/walk-backward_0009.png',
-            'static/images/knight/walk-backward/walk-backward_0010.png',
-            'static/images/knight/walk-backward/walk-backward_0011.png',
             'static/images/knight/walk-backward/walk-backward_0012.png',
-            'static/images/knight/walk-backward/walk-backward_0013.png',
-            'static/images/knight/walk-backward/walk-backward_0014.png',
-            'static/images/knight/walk-backward/walk-backward_0015.png',
             'static/images/knight/walk-backward/walk-backward_0016.png',
-            'static/images/knight/walk-backward/walk-backward_0017.png',
-            'static/images/knight/walk-backward/walk-backward_0018.png',
-            'static/images/knight/walk-backward/walk-backward_0019.png',
             'static/images/knight/walk-backward/walk-backward_0020.png',
-            'static/images/knight/walk-backward/walk-backward_0021.png',
-            'static/images/knight/walk-backward/walk-backward_0022.png',
-            'static/images/knight/walk-backward/walk-backward_0023.png',
             'static/images/knight/walk-backward/walk-backward_0024.png',
-            'static/images/knight/walk-backward/walk-backward_0025.png',
-            'static/images/knight/walk-backward/walk-backward_0026.png',
-            'static/images/knight/walk-backward/walk-backward_0027.png',
             'static/images/knight/walk-backward/walk-backward_0028.png',
-            'static/images/knight/walk-backward/walk-backward_0029.png',
-            'static/images/knight/walk-backward/walk-backward_0030.png',
-            'static/images/knight/walk-backward/walk-backward_0031.png',
             'static/images/knight/walk-backward/walk-backward_0032.png',
-            'static/images/knight/walk-backward/walk-backward_0033.png',
-            'static/images/knight/walk-backward/walk-backward_0034.png',
-            'static/images/knight/walk-backward/walk-backward_0035.png',
             'static/images/knight/walk-backward/walk-backward_0036.png',
-            'static/images/knight/walk-backward/walk-backward_0037.png',
-            'static/images/knight/walk-backward/walk-backward_0038.png',
-            'static/images/knight/walk-backward/walk-backward_0039.png',
             'static/images/knight/walk-backward/walk-backward_0040.png',
-            'static/images/knight/walk-backward/walk-backward_0041.png',
-            'static/images/knight/walk-backward/walk-backward_0042.png',
-            'static/images/knight/walk-backward/walk-backward_0043.png',
             'static/images/knight/walk-backward/walk-backward_0044.png',
-            'static/images/knight/walk-backward/walk-backward_0045.png',
-            'static/images/knight/walk-backward/walk-backward_0046.png',
-            'static/images/knight/walk-backward/walk-backward_0047.png',
             'static/images/knight/walk-backward/walk-backward_0048.png'
           ],
           attack_backward_sprites: [
             'static/images/knight/attack-backward/attack-backward_0000.png',
-            'static/images/knight/attack-backward/attack-backward_0001.png',
-            'static/images/knight/attack-backward/attack-backward_0002.png',
-            'static/images/knight/attack-backward/attack-backward_0003.png',
             'static/images/knight/attack-backward/attack-backward_0004.png',
-            'static/images/knight/attack-backward/attack-backward_0005.png',
-            'static/images/knight/attack-backward/attack-backward_0006.png',
-            'static/images/knight/attack-backward/attack-backward_0007.png',
             'static/images/knight/attack-backward/attack-backward_0008.png',
-            'static/images/knight/attack-backward/attack-backward_0009.png',
-            'static/images/knight/attack-backward/attack-backward_0010.png',
-            'static/images/knight/attack-backward/attack-backward_0011.png',
             'static/images/knight/attack-backward/attack-backward_0012.png',
-            'static/images/knight/attack-backward/attack-backward_0013.png',
-            'static/images/knight/attack-backward/attack-backward_0014.png',
-            'static/images/knight/attack-backward/attack-backward_0015.png',
             'static/images/knight/attack-backward/attack-backward_0016.png',
-            'static/images/knight/attack-backward/attack-backward_0017.png',
-            'static/images/knight/attack-backward/attack-backward_0018.png',
-            'static/images/knight/attack-backward/attack-backward_0019.png',
             'static/images/knight/attack-backward/attack-backward_0020.png',
-            'static/images/knight/attack-backward/attack-backward_0021.png',
-            'static/images/knight/attack-backward/attack-backward_0022.png',
-            'static/images/knight/attack-backward/attack-backward_0023.png',
             'static/images/knight/attack-backward/attack-backward_0024.png',
-            'static/images/knight/attack-backward/attack-backward_0025.png',
-            'static/images/knight/attack-backward/attack-backward_0026.png',
-            'static/images/knight/attack-backward/attack-backward_0027.png',
             'static/images/knight/attack-backward/attack-backward_0028.png',
-            'static/images/knight/attack-backward/attack-backward_0029.png',
-            'static/images/knight/attack-backward/attack-backward_0030.png',
-            'static/images/knight/attack-backward/attack-backward_0031.png',
             'static/images/knight/attack-backward/attack-backward_0032.png',
-            'static/images/knight/attack-backward/attack-backward_0033.png',
-            'static/images/knight/attack-backward/attack-backward_0034.png',
-            'static/images/knight/attack-backward/attack-backward_0035.png',
             'static/images/knight/attack-backward/attack-backward_0036.png',
-            'static/images/knight/attack-backward/attack-backward_0037.png',
-            'static/images/knight/attack-backward/attack-backward_0038.png',
-            'static/images/knight/attack-backward/attack-backward_0039.png',
             'static/images/knight/attack-backward/attack-backward_0040.png',
-            'static/images/knight/attack-backward/attack-backward_0041.png',
-            'static/images/knight/attack-backward/attack-backward_0042.png',
-            'static/images/knight/attack-backward/attack-backward_0043.png',
             'static/images/knight/attack-backward/attack-backward_0044.png',
-            'static/images/knight/attack-backward/attack-backward_0045.png',
-            'static/images/knight/attack-backward/attack-backward_0046.png',
-            'static/images/knight/attack-backward/attack-backward_0047.png',
             'static/images/knight/attack-backward/attack-backward_0048.png'
           ],
           attack_sprites: [
             'static/images/knight/attack/attack_0000.png',
-            'static/images/knight/attack/attack_0001.png',
-            'static/images/knight/attack/attack_0002.png',
-            'static/images/knight/attack/attack_0003.png',
             'static/images/knight/attack/attack_0004.png',
-            'static/images/knight/attack/attack_0005.png',
-            'static/images/knight/attack/attack_0006.png',
-            'static/images/knight/attack/attack_0007.png',
             'static/images/knight/attack/attack_0008.png',
-            'static/images/knight/attack/attack_0009.png',
-            'static/images/knight/attack/attack_0010.png',
-            'static/images/knight/attack/attack_0011.png',
             'static/images/knight/attack/attack_0012.png',
-            'static/images/knight/attack/attack_0013.png',
-            'static/images/knight/attack/attack_0014.png',
-            'static/images/knight/attack/attack_0015.png',
             'static/images/knight/attack/attack_0016.png',
-            'static/images/knight/attack/attack_0017.png',
-            'static/images/knight/attack/attack_0018.png',
-            'static/images/knight/attack/attack_0019.png',
             'static/images/knight/attack/attack_0020.png',
-            'static/images/knight/attack/attack_0021.png',
-            'static/images/knight/attack/attack_0022.png',
-            'static/images/knight/attack/attack_0023.png',
             'static/images/knight/attack/attack_0024.png',
-            'static/images/knight/attack/attack_0025.png',
-            'static/images/knight/attack/attack_0026.png',
-            'static/images/knight/attack/attack_0027.png',
             'static/images/knight/attack/attack_0028.png',
-            'static/images/knight/attack/attack_0029.png',
-            'static/images/knight/attack/attack_0030.png',
-            'static/images/knight/attack/attack_0031.png',
             'static/images/knight/attack/attack_0032.png',
-            'static/images/knight/attack/attack_0033.png',
-            'static/images/knight/attack/attack_0034.png',
-            'static/images/knight/attack/attack_0035.png',
             'static/images/knight/attack/attack_0036.png',
-            'static/images/knight/attack/attack_0037.png',
-            'static/images/knight/attack/attack_0038.png',
-            'static/images/knight/attack/attack_0039.png',
             'static/images/knight/attack/attack_0040.png',
-            'static/images/knight/attack/attack_0041.png',
-            'static/images/knight/attack/attack_0042.png',
-            'static/images/knight/attack/attack_0043.png',
             'static/images/knight/attack/attack_0044.png',
-            'static/images/knight/attack/attack_0045.png',
-            'static/images/knight/attack/attack_0046.png',
-            'static/images/knight/attack/attack_0047.png',
             'static/images/knight/attack/attack_0048.png'
           ],
           turn_left_sprites: [
             'static/images/knight/turn/turn_0000.png',
-            'static/images/knight/turn/turn_0001.png',
-            'static/images/knight/turn/turn_0002.png',
-            'static/images/knight/turn/turn_0003.png',
             'static/images/knight/turn/turn_0004.png',
-            'static/images/knight/turn/turn_0005.png',
-            'static/images/knight/turn/turn_0006.png',
-            'static/images/knight/turn/turn_0007.png',
             'static/images/knight/turn/turn_0008.png',
-            'static/images/knight/turn/turn_0009.png',
-            'static/images/knight/turn/turn_0010.png',
-            'static/images/knight/turn/turn_0011.png',
             'static/images/knight/turn/turn_0012.png',
-            'static/images/knight/turn/turn_0013.png',
-            'static/images/knight/turn/turn_0014.png',
-            'static/images/knight/turn/turn_0015.png',
             'static/images/knight/turn/turn_0016.png',
-            'static/images/knight/turn/turn_0017.png',
-            'static/images/knight/turn/turn_0018.png',
-            'static/images/knight/turn/turn_0019.png',
             'static/images/knight/turn/turn_0020.png',
-            'static/images/knight/turn/turn_0021.png',
-            'static/images/knight/turn/turn_0022.png',
-            'static/images/knight/turn/turn_0023.png',
             'static/images/knight/turn/turn_0024.png',
-            'static/images/knight/turn/turn_0025.png',
-            'static/images/knight/turn/turn_0026.png',
-            'static/images/knight/turn/turn_0027.png',
             'static/images/knight/turn/turn_0028.png',
-            'static/images/knight/turn/turn_0029.png',
-            'static/images/knight/turn/turn_0030.png',
-            'static/images/knight/turn/turn_0031.png',
             'static/images/knight/turn/turn_0032.png',
-            'static/images/knight/turn/turn_0033.png',
-            'static/images/knight/turn/turn_0034.png',
-            'static/images/knight/turn/turn_0035.png',
             'static/images/knight/turn/turn_0036.png',
-            'static/images/knight/turn/turn_0037.png',
-            'static/images/knight/turn/turn_0038.png',
-            'static/images/knight/turn/turn_0039.png',
             'static/images/knight/turn/turn_0040.png',
-            'static/images/knight/turn/turn_0041.png',
-            'static/images/knight/turn/turn_0042.png',
-            'static/images/knight/turn/turn_0043.png',
             'static/images/knight/turn/turn_0044.png',
-            'static/images/knight/turn/turn_0045.png',
-            'static/images/knight/turn/turn_0046.png',
-            'static/images/knight/turn/turn_0047.png',
             'static/images/knight/turn/turn_0048.png'
           ],
           victory_sprites: [
             'static/images/knight/victory/victory_0000.png',
-            'static/images/knight/victory/victory_0001.png',
-            'static/images/knight/victory/victory_0002.png',
-            'static/images/knight/victory/victory_0003.png',
             'static/images/knight/victory/victory_0004.png',
-            'static/images/knight/victory/victory_0005.png',
-            'static/images/knight/victory/victory_0006.png',
-            'static/images/knight/victory/victory_0007.png',
             'static/images/knight/victory/victory_0008.png',
-            'static/images/knight/victory/victory_0009.png',
-            'static/images/knight/victory/victory_0010.png',
-            'static/images/knight/victory/victory_0011.png',
             'static/images/knight/victory/victory_0012.png',
-            'static/images/knight/victory/victory_0013.png',
-            'static/images/knight/victory/victory_0014.png',
-            'static/images/knight/victory/victory_0015.png',
             'static/images/knight/victory/victory_0016.png',
-            'static/images/knight/victory/victory_0017.png',
-            'static/images/knight/victory/victory_0018.png',
-            'static/images/knight/victory/victory_0019.png',
             'static/images/knight/victory/victory_0020.png',
-            'static/images/knight/victory/victory_0021.png',
-            'static/images/knight/victory/victory_0022.png',
-            'static/images/knight/victory/victory_0023.png',
             'static/images/knight/victory/victory_0024.png',
-            'static/images/knight/victory/victory_0025.png',
-            'static/images/knight/victory/victory_0026.png',
-            'static/images/knight/victory/victory_0027.png',
             'static/images/knight/victory/victory_0028.png',
-            'static/images/knight/victory/victory_0029.png',
-            'static/images/knight/victory/victory_0030.png',
-            'static/images/knight/victory/victory_0031.png',
             'static/images/knight/victory/victory_0032.png',
-            'static/images/knight/victory/victory_0033.png',
-            'static/images/knight/victory/victory_0034.png',
-            'static/images/knight/victory/victory_0035.png',
             'static/images/knight/victory/victory_0036.png',
-            'static/images/knight/victory/victory_0037.png',
-            'static/images/knight/victory/victory_0038.png',
-            'static/images/knight/victory/victory_0039.png',
             'static/images/knight/victory/victory_0040.png',
-            'static/images/knight/victory/victory_0041.png',
-            'static/images/knight/victory/victory_0042.png',
-            'static/images/knight/victory/victory_0043.png',
             'static/images/knight/victory/victory_0044.png',
-            'static/images/knight/victory/victory_0045.png',
-            'static/images/knight/victory/victory_0046.png',
-            'static/images/knight/victory/victory_0047.png',
             'static/images/knight/victory/victory_0048.png'
           ],
           victory_backward_sprites: [
             'static/images/knight/victory-backward/victory-backward_0000.png',
-            'static/images/knight/victory-backward/victory-backward_0001.png',
-            'static/images/knight/victory-backward/victory-backward_0002.png',
-            'static/images/knight/victory-backward/victory-backward_0003.png',
             'static/images/knight/victory-backward/victory-backward_0004.png',
-            'static/images/knight/victory-backward/victory-backward_0005.png',
-            'static/images/knight/victory-backward/victory-backward_0006.png',
-            'static/images/knight/victory-backward/victory-backward_0007.png',
             'static/images/knight/victory-backward/victory-backward_0008.png',
-            'static/images/knight/victory-backward/victory-backward_0009.png',
-            'static/images/knight/victory-backward/victory-backward_0010.png',
-            'static/images/knight/victory-backward/victory-backward_0011.png',
             'static/images/knight/victory-backward/victory-backward_0012.png',
-            'static/images/knight/victory-backward/victory-backward_0013.png',
-            'static/images/knight/victory-backward/victory-backward_0014.png',
-            'static/images/knight/victory-backward/victory-backward_0015.png',
             'static/images/knight/victory-backward/victory-backward_0016.png',
-            'static/images/knight/victory-backward/victory-backward_0017.png',
-            'static/images/knight/victory-backward/victory-backward_0018.png',
-            'static/images/knight/victory-backward/victory-backward_0019.png',
             'static/images/knight/victory-backward/victory-backward_0020.png',
-            'static/images/knight/victory-backward/victory-backward_0021.png',
-            'static/images/knight/victory-backward/victory-backward_0022.png',
-            'static/images/knight/victory-backward/victory-backward_0023.png',
             'static/images/knight/victory-backward/victory-backward_0024.png',
-            'static/images/knight/victory-backward/victory-backward_0025.png',
-            'static/images/knight/victory-backward/victory-backward_0026.png',
-            'static/images/knight/victory-backward/victory-backward_0027.png',
             'static/images/knight/victory-backward/victory-backward_0028.png',
-            'static/images/knight/victory-backward/victory-backward_0029.png',
-            'static/images/knight/victory-backward/victory-backward_0030.png',
-            'static/images/knight/victory-backward/victory-backward_0031.png',
             'static/images/knight/victory-backward/victory-backward_0032.png',
-            'static/images/knight/victory-backward/victory-backward_0033.png',
-            'static/images/knight/victory-backward/victory-backward_0034.png',
-            'static/images/knight/victory-backward/victory-backward_0035.png',
             'static/images/knight/victory-backward/victory-backward_0036.png',
-            'static/images/knight/victory-backward/victory-backward_0037.png',
-            'static/images/knight/victory-backward/victory-backward_0038.png',
-            'static/images/knight/victory-backward/victory-backward_0039.png',
             'static/images/knight/victory-backward/victory-backward_0040.png',
-            'static/images/knight/victory-backward/victory-backward_0041.png',
-            'static/images/knight/victory-backward/victory-backward_0042.png',
-            'static/images/knight/victory-backward/victory-backward_0043.png',
             'static/images/knight/victory-backward/victory-backward_0044.png',
-            'static/images/knight/victory-backward/victory-backward_0045.png',
-            'static/images/knight/victory-backward/victory-backward_0046.png',
-            'static/images/knight/victory-backward/victory-backward_0047.png',
             'static/images/knight/victory-backward/victory-backward_0048.png'
           ],
           fail_sprites: [
             'static/images/knight/fail/fail_0000.png',
-            'static/images/knight/fail/fail_0001.png',
-            'static/images/knight/fail/fail_0002.png',
-            'static/images/knight/fail/fail_0003.png',
             'static/images/knight/fail/fail_0004.png',
-            'static/images/knight/fail/fail_0005.png',
-            'static/images/knight/fail/fail_0006.png',
-            'static/images/knight/fail/fail_0007.png',
             'static/images/knight/fail/fail_0008.png',
-            'static/images/knight/fail/fail_0009.png',
-            'static/images/knight/fail/fail_0010.png',
-            'static/images/knight/fail/fail_0011.png',
             'static/images/knight/fail/fail_0012.png',
-            'static/images/knight/fail/fail_0013.png',
-            'static/images/knight/fail/fail_0014.png',
-            'static/images/knight/fail/fail_0015.png',
             'static/images/knight/fail/fail_0016.png',
-            'static/images/knight/fail/fail_0017.png',
-            'static/images/knight/fail/fail_0018.png',
-            'static/images/knight/fail/fail_0019.png',
             'static/images/knight/fail/fail_0020.png',
-            'static/images/knight/fail/fail_0021.png',
-            'static/images/knight/fail/fail_0022.png',
-            'static/images/knight/fail/fail_0023.png',
             'static/images/knight/fail/fail_0024.png',
-            'static/images/knight/fail/fail_0025.png',
-            'static/images/knight/fail/fail_0026.png',
-            'static/images/knight/fail/fail_0027.png',
             'static/images/knight/fail/fail_0028.png',
-            'static/images/knight/fail/fail_0029.png',
-            'static/images/knight/fail/fail_0030.png',
-            'static/images/knight/fail/fail_0031.png',
             'static/images/knight/fail/fail_0032.png',
-            'static/images/knight/fail/fail_0033.png',
-            'static/images/knight/fail/fail_0034.png',
-            'static/images/knight/fail/fail_0035.png',
             'static/images/knight/fail/fail_0036.png',
-            'static/images/knight/fail/fail_0037.png',
-            'static/images/knight/fail/fail_0038.png',
-            'static/images/knight/fail/fail_0039.png',
             'static/images/knight/fail/fail_0040.png',
-            'static/images/knight/fail/fail_0041.png',
-            'static/images/knight/fail/fail_0042.png',
-            'static/images/knight/fail/fail_0043.png',
             'static/images/knight/fail/fail_0044.png',
-            'static/images/knight/fail/fail_0045.png',
-            'static/images/knight/fail/fail_0046.png',
-            'static/images/knight/fail/fail_0047.png',
             'static/images/knight/fail/fail_0048.png'
           ],
           fail_backward_sprites: [
             'static/images/knight/fail-backward/fail-backward_0000.png',
-            'static/images/knight/fail-backward/fail-backward_0001.png',
-            'static/images/knight/fail-backward/fail-backward_0002.png',
-            'static/images/knight/fail-backward/fail-backward_0003.png',
             'static/images/knight/fail-backward/fail-backward_0004.png',
-            'static/images/knight/fail-backward/fail-backward_0005.png',
-            'static/images/knight/fail-backward/fail-backward_0006.png',
-            'static/images/knight/fail-backward/fail-backward_0007.png',
             'static/images/knight/fail-backward/fail-backward_0008.png',
-            'static/images/knight/fail-backward/fail-backward_0009.png',
-            'static/images/knight/fail-backward/fail-backward_0010.png',
-            'static/images/knight/fail-backward/fail-backward_0011.png',
             'static/images/knight/fail-backward/fail-backward_0012.png',
-            'static/images/knight/fail-backward/fail-backward_0013.png',
-            'static/images/knight/fail-backward/fail-backward_0014.png',
-            'static/images/knight/fail-backward/fail-backward_0015.png',
             'static/images/knight/fail-backward/fail-backward_0016.png',
-            'static/images/knight/fail-backward/fail-backward_0017.png',
-            'static/images/knight/fail-backward/fail-backward_0018.png',
-            'static/images/knight/fail-backward/fail-backward_0019.png',
             'static/images/knight/fail-backward/fail-backward_0020.png',
-            'static/images/knight/fail-backward/fail-backward_0021.png',
-            'static/images/knight/fail-backward/fail-backward_0022.png',
-            'static/images/knight/fail-backward/fail-backward_0023.png',
             'static/images/knight/fail-backward/fail-backward_0024.png',
-            'static/images/knight/fail-backward/fail-backward_0025.png',
-            'static/images/knight/fail-backward/fail-backward_0026.png',
-            'static/images/knight/fail-backward/fail-backward_0027.png',
             'static/images/knight/fail-backward/fail-backward_0028.png',
-            'static/images/knight/fail-backward/fail-backward_0029.png',
-            'static/images/knight/fail-backward/fail-backward_0030.png',
-            'static/images/knight/fail-backward/fail-backward_0031.png',
             'static/images/knight/fail-backward/fail-backward_0032.png',
-            'static/images/knight/fail-backward/fail-backward_0033.png',
-            'static/images/knight/fail-backward/fail-backward_0034.png',
-            'static/images/knight/fail-backward/fail-backward_0035.png',
             'static/images/knight/fail-backward/fail-backward_0036.png',
-            'static/images/knight/fail-backward/fail-backward_0037.png',
-            'static/images/knight/fail-backward/fail-backward_0038.png',
-            'static/images/knight/fail-backward/fail-backward_0039.png',
             'static/images/knight/fail-backward/fail-backward_0040.png',
-            'static/images/knight/fail-backward/fail-backward_0041.png',
-            'static/images/knight/fail-backward/fail-backward_0042.png',
-            'static/images/knight/fail-backward/fail-backward_0043.png',
             'static/images/knight/fail-backward/fail-backward_0044.png',
-            'static/images/knight/fail-backward/fail-backward_0045.png',
-            'static/images/knight/fail-backward/fail-backward_0046.png',
-            'static/images/knight/fail-backward/fail-backward_0047.png',
             'static/images/knight/fail-backward/fail-backward_0048.png'
           ],
           items: [
@@ -532,9 +201,22 @@
               image: '/static/images/knight/background/stone.png',
               count: 30,
               random: true,
-              scale: 1,
               coordinates: [],
               blocker: true
+            },
+            {
+              image: 'static/images/knight/background/destination.png',
+              count: 1,
+              random: false,
+              coordinates: [
+                {
+                  x: 8,
+                  y: 2,
+                  xOffset: 0,
+                  yOffset: -20
+                }
+              ],
+              blocker: false
             }
           ],
           maxSteps: 20,
@@ -545,50 +227,93 @@
           },
           showModal: false,
           finalStatus: '',
-          initLoading: function () {
+          imageLoadingCompleted: true,
+          imageTotal: 122,
+          imageLoadedCount: 0,
+          instructionDebugPrint: '',
+          character_starting_x_in_pixel: 0, // This value will be initialized based on actual screen size
+          character_starting_y_in_pixel: 0, // This value will be initialized based on actual screen size
+          step_width_in_pixel: 100, // This value will be initialized based on actual screen size
+          step_height_in_pixel: 100, // This value will be initialized based on actual screen size
+          canvasWidth: 0,
+          canvasHeight: 0,
+          resetInitContext: function () {
+            console.log('Reset init context values.')
             this.showModal = false
             this.finalStatus = ''
-            let ctx
-            const background = document.getElementById('background')
+          },
+          calculateAndSetCharacterStartingPositionAndStepSizesResponsively: function () {
+            this.character_starting_x_in_pixel = Math.round(this.canvasWidth * this.character_start_x_percentage)
+            this.character_starting_y_in_pixel = Math.round(this.canvasHeight * this.character_start_y_percentage)
+            this.step_width_in_pixel = Math.round(this.canvasWidth * this.step_x_percentage)
+            this.step_height_in_pixel = Math.round(this.canvasHeight * this.step_y_percentage)
+          },
+          incrementImageLoadedCount: function (value) {
+          },
+          setCanvasSizeByBackgroundImageSize: function () {
+            let bgComponent = document.getElementById('background')
+            this.canvasWidth = bgComponent.width
+            this.canvasHeight = bgComponent.height
+            console.log('Canvas size set as width = ' + this.canvasWidth + ' and height = ' + this.canvasHeight)
+          },
+          setAndGetMainCharacterCanvasContext: function () {
             const mainCharacterCanvas = document.getElementById('character')
-            console.log('Set canvas size as width = ' + background.width + ' and height = ' + background.height)
-            mainCharacterCanvas.width = background.width
-            mainCharacterCanvas.height = background.width
-            ctx = mainCharacterCanvas.getContext('2d')
+            console.log('Set Main Character Canvas size as width = ' + this.canvasWidth + ' and height = ' + this.canvasHeight)
+            let mainCharacterContext = mainCharacterCanvas.getContext('2d')
+            mainCharacterCanvas.width = this.canvasWidth
+            mainCharacterCanvas.height = this.canvasHeight
+            return mainCharacterContext
+          },
+          drawMainCharacterAtStartingPosition: function (ctx) {
+            const cWidth = this.character_width_in_pixel
+            const cHeight = this.character_height_in_pixel
+            const cStartingX = Math.round(this.canvasWidth * this.character_start_x_percentage) + Math.round(this.step_width_in_pixel / 2) - Math.round(cWidth / 2)
+            const cStartingY = Math.round(this.canvasHeight * this.character_start_y_percentage) - cHeight
+            let incrementImageLoadedCount = this.incrementImageLoadedCount
             const cImg = new Image()
             const shadowImg = new Image()
-            const w = this.cWidth
-            const h = this.cHeight
-            this.step_x = Math.round(background.width * this.step_ratio_x)
-            this.step_y = Math.round(background.height * this.step_ratio_y)
-            const cx = Math.round(background.width * this.character_start_ratio_x) + Math.round(this.step_x / 2) - Math.round(w / 2)
-            const cy = Math.round(background.height * this.character_start_ratio_y) - h
-            const cScale = this.cScale
-            this.start_x = Math.round(background.width * this.character_start_ratio_x)
-            this.start_y = Math.round(background.height * this.character_start_ratio_y)
             cImg.onload = function () {
-              console.log('Init loading: ' + cImg.src + ' at location: x = ' + cx + ' and y = ' + cy + ' image size: width = ' + cImg.width + ' height = ' + cImg.height)
-              ctx.drawImage(shadowImg, cx, cy, w * cScale, h * cScale)
-              ctx.drawImage(cImg, cx, cy, w * cScale, h * cScale)
-              // ctx.strokeRect(cx, cy, w * cScale, h * cScale)
+              console.log('Init loading: ' + cImg.src + ' at location: x = ' + cStartingX + ' and y = ' + cStartingY + ' image size: width = ' + cImg.width + ' height = ' + cImg.height)
+              ctx.drawImage(shadowImg, cStartingX, cStartingY, cWidth, cHeight)
+              ctx.drawImage(cImg, cStartingX, cStartingY, cWidth, cHeight)
+              incrementImageLoadedCount(2)
+              // ctx.strokeRect(cStartingX, cStartingY, cWidth, cHeight)
             }
-            cImg.src = this.cSprite
+            cImg.src = this.character_sprite
             shadowImg.src = this.shadowSprite
+          },
+          setAndGetItemsCanvasContext: function () {
+            const itemsCanvas = document.getElementById('items')
+            console.log('Set Items Canvas size as width = ' + this.canvasWidth + ' and height = ' + this.canvasHeight)
+            let itemsContext = itemsCanvas.getContext('2d')
+            itemsCanvas.width = this.canvasWidth
+            itemsCanvas.height = this.canvasHeight
+            return itemsContext
+          },
+          drawFrontGround: function (itemsContext) {
+            let fImg = new Image()
+            let incrementImageLoadedCount = this.incrementImageLoadedCount
+            let fWidth = this.canvasWidth
+            let fHeight = this.canvasHeight
+            fImg.onload = function () {
+              console.log('Draw front ground image with size width = ' + fWidth + ' height = ' + fHeight)
+              itemsContext.drawImage(fImg, 0, 0, fWidth, fHeight)
+              incrementImageLoadedCount(1)
+            }
+            fImg.src = this.front_ground
+          },
+          drawItems: function (itemsContext) {
             let items = this.items
-            let dX = this.passCondition.destinationXGrid
-            let dY = this.passCondition.destinationYGrid
-            let gw = this.step_x
-            let gh = this.step_y
-            let gridStartX = Math.round(background.width * this.grid_start_ratio_x)
-            let gridStartY = Math.round(background.height * this.grid_start_ratio_y)
+            let dGridX = this.passCondition.destinationXGrid
+            let dGridY = this.passCondition.destinationYGrid
+            let gridWidth = this.step_width_in_pixel
+            let gridHeight = this.step_height_in_pixel
+            let gridStartX = Math.round(this.canvasWidth * this.grid_board_top_left_x_percentage)
+            let gridStartY = Math.round(this.canvasHeight * this.grid_board_top_left_y_percentage)
+            console.log('Background width = ' + this.canvasWidth + ' Background height = ' + this.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
             if (items.length > 0) {
-              const itemsCanvas = document.getElementById('items')
-              let itemsContext = itemsCanvas.getContext('2d')
-              itemsCanvas.width = background.width
-              itemsCanvas.height = background.width
-
-              var checkValid = function (coordinates, xSize, ySize, dX, dY) {
-                console.log('Check valid for map with Size : (' + xSize + ' , ' + ySize + ') and dX = ' + dX + ' dY = ' + dY)
+              let checkValid = function (coordinates, xGridSize, yGridSize, dGridX, dGridY) {
+                console.log('Check valid for map with Size : (' + xGridSize + ' , ' + yGridSize + ') and dX = ' + dGridX + ' dY = ' + dGridY)
                 let xq = []
                 let yq = []
                 let xOffset = [1, -1, 0, 0]
@@ -600,14 +325,14 @@
                 while (xq.length > 0) {
                   let curX = xq.shift()
                   let curY = yq.shift()
-                  if (curX === dX && curY === dY) {
-                    console.log('Map is valid: ' + ' x = ' + curX + ' y = ' + curY + ' dX = ' + dX + ' dY = ' + dY)
+                  if (curX === dGridX && curY === dGridY) {
+                    console.log('Map is valid: ' + ' x = ' + curX + ' y = ' + curY + ' dX = ' + dGridX + ' dY = ' + dGridY)
                     return true
                   } else {
                     for (let k = 0; k < 4; k++) {
                       let nX = curX + xOffset[k]
                       let nY = curY + yOffset[k]
-                      if (nX >= 0 && nY >= 0 && nX < xSize && nY < ySize && visited.indexOf(nX + '_' + nY) === -1 && coordinates.indexOf(nX + '_' + nY) === -1) {
+                      if (nX >= 0 && nY >= 0 && nX < xGridSize && nY < yGridSize && visited.indexOf(nX + '_' + nY) === -1 && coordinates.indexOf(nX + '_' + nY) === -1) {
                         xq.push(nX)
                         yq.push(nY)
                         visited.push(nX + '_' + nY)
@@ -621,13 +346,12 @@
               for (let i = 0; i < items.length; i++) {
                 let item = items[i]
                 let iImg = new Image()
-                let iScale = item.scale
                 if (item.random === true) {
                   let iCount = item.count
                   let solvable = false
-                  let xSize = this.grid_x
-                  let ySize = this.grid_y
-                  console.log('grid x size = ' + xSize + ' grid y size = ' + ySize + ' destination x = ' + dX + ' destination y = ' + dY)
+                  let xSize = this.grid_x_size
+                  let ySize = this.grid_y_size
+                  console.log('grid x size = ' + xSize + ' grid y size = ' + ySize + ' destination x = ' + dGridX + ' destination y = ' + dGridY)
                   while (!solvable) {
                     item.coordinates = []
                     let currentCount = 0
@@ -639,45 +363,84 @@
                       rx = Math.floor(Math.random() * xSize)
                       ry = Math.floor(Math.random() * ySize)
                       key = rx + '_' + ry
-                      if (key !== (dX + '_' + dY) && key !== '0_0' && rTrack.indexOf() === -1) {
-                        item.coordinates.push({x: rx, y: ry})
+                      if (key !== (dGridX + '_' + dGridY) && key !== '0_0' && rTrack.indexOf() === -1) {
+                        item.coordinates.push({x: rx, y: ry, xOffset: 0, yOffset: 0})
                         rTrack.push(rx + '_' + ry)
                         currentCount++
                       }
                     }
-                    if (checkValid(rTrack, xSize, ySize, dX, dY)) {
+                    if (checkValid(rTrack, xSize, ySize, dGridX, dGridY)) {
                       solvable = true
                     }
                   }
                 }
+                let incrementImageLoadedCount = this.incrementImageLoadedCount
                 iImg.onload = function () {
-                  console.log('Locations to draw item: ' + item.coordinates.length + ' items.')
                   for (let j = 0; j < item.coordinates.length; j++) {
                     let position = item.coordinates[j]
-                    let ix = Math.round(gridStartX + position.x * gw)
-                    let iy = Math.round(gridStartY + position.y * gh)
-                    console.log('px = ' + position.x + ' py = ' + position.y + ' x = ' + ix + ' y = ' + iy)
-                    itemsContext.drawImage(iImg, ix, iy, gw * iScale, gh * iScale)
+                    let ix = Math.round(gridStartX + position.x * gridWidth) + position.xOffset
+                    let iy = Math.round(gridStartY + position.y * gridHeight) + position.yOffset
+                    console.log('Draw item ' + i + ' at gx = ' + position.x + ' gy = ' + position.y + ' x = ' + ix + ' y = ' + iy)
+                    itemsContext.drawImage(iImg, ix, iy, gridWidth, gridHeight)
                   }
+                  incrementImageLoadedCount(1)
                 }
                 console.log('Item image: ' + item.image)
                 iImg.src = item.image
               }
-
-              let dImg = new Image()
-              dImg.onload = function () {
-                let dx = Math.round(gridStartX + dX * gw)
-                let dy = Math.round(gridStartY + dY * gh)
-                itemsContext.drawImage(dImg, dx, dy, gw, gh)
-              }
-              dImg.src = this.destinationSprite
-
-              let fImg = new Image()
-              fImg.onload = function () {
-                itemsContext.drawImage(fImg, 0, 0, background.width, background.height)
-              }
-              fImg.src = this.front_ground
             }
+          },
+          setAndGetGridBoardCanvasContext: function () {
+            const gridBoardCanvas = document.getElementById('grid-board')
+            console.log('Set Grid Board Canvas size as width = ' + this.canvasWidth + ' and height = ' + this.canvasHeight)
+            gridBoardCanvas.width = this.canvasWidth
+            gridBoardCanvas.height = this.canvasHeight
+            return gridBoardCanvas.getContext('2d')
+          },
+          drawGridBoard: function (gridBoardContext) {
+            let gridWidth = this.step_width_in_pixel
+            let gridHeight = this.step_height_in_pixel
+            let gridStartX = Math.round(this.canvasWidth * this.grid_board_top_left_x_percentage)
+            let gridStartY = Math.round(this.canvasHeight * this.grid_board_top_left_y_percentage)
+            let gridXSize = this.grid_x_size
+            let gridYSize = this.grid_y_size
+            let gridImage = new Image()
+            let incrementImageLoadedCount = this.incrementImageLoadedCount
+            console.log('Background width = ' + this.canvasWidth + ' Background height = ' + this.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
+            gridImage.onload = function () {
+              console.log('Draw grid images.')
+              for (let r = 0; r < gridYSize; r++) {
+                for (let c = r % 2; c < gridXSize; c += 2) {
+                  let ix = Math.round(gridStartX + c * gridWidth)
+                  let iy = Math.round(gridStartY + r * gridHeight)
+                  console.log('Draw grid images at r = ' + r + ' c = ' + c + ' x = ' + ix + ' y = ' + iy)
+                  gridBoardContext.drawImage(gridImage, ix, iy, gridWidth, gridHeight)
+                }
+              }
+              incrementImageLoadedCount(1)
+            }
+            gridImage.src = this.gridSprite
+          },
+          initLoading: function () {
+            this.resetInitContext()
+
+            this.setCanvasSizeByBackgroundImageSize()
+
+            let mainCharacterContext = this.setAndGetMainCharacterCanvasContext()
+
+            this.calculateAndSetCharacterStartingPositionAndStepSizesResponsively()
+
+            const gridBoardContext = this.setAndGetGridBoardCanvasContext()
+
+            this.drawGridBoard(gridBoardContext)
+
+            this.drawMainCharacterAtStartingPosition(mainCharacterContext)
+
+            let itemsContext = this.setAndGetItemsCanvasContext()
+
+            this.drawItems(itemsContext)
+
+            this.drawFrontGround(itemsContext)
           }
         }
       }
@@ -744,6 +507,7 @@
     left: 0;
     top: 0;
   }
+
   .popup {
     position: absolute;
     left: 0;
