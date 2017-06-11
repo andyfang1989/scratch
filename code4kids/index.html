@@ -3,9 +3,51 @@
   <head>
     <meta charset="utf-8">
     <title>code4kids</title>
+    <script src="/static/js/blockly_compressed.js"></script>
+    <script src="/static/js/blocks_compressed.js"></script>
+    <script src="/static/js/javascript_compressed.js"></script>
+    <script src="/static/js/zh-hans.js"></script>
+    <script src="/static/js/custom_block_defs.js"></script>
+    <script src="/static/js/custom_code_generators.js"></script>
   </head>
   <body>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <!--<div id='blocklyDiv' style='height: 400px; width: 1200px;'></div>-->
+    <xml id="toolbox" style="display: none">
+      <block type="logic_compare"></block>
+      <block type="statement_start"></block>
+      <block type="statement_end"></block>
+      <block type="statement_walk_right"></block>
+      <block type="statement_walk_left"></block>
+      <block type="statement_walk_up"></block>
+      <block type="statement_walk_down"></block>
+      <block type="statement_run_right"></block>
+      <block type="statement_run_left"></block>
+      <block type="statement_run_up"></block>
+      <block type="statement_run_down"></block>
+      <block type="statement_attack"></block>
+      <block type="statement_jump"></block>
+      <block type="statement_turn"></block>
+      <block type="statement_repeat"></block>
+      <block type="statement_condition_if"></block>
+    </xml>
+    <script>
+    var workspace;
+    var options = {
+      toolbox : document.getElementById('toolbox'),
+      horizontalLayout : true
+    };
+    function addBlocksBoard() {
+      workspace = Blockly.inject('blocklyDiv', options);
+      var blockD = document.getElementById('blocklyDiv');
+      blockD.style.top = '600px';
+      blockD.style.height = '400px';
+    }
+    function updateInstruction() {
+      var instructionD = document.getElementById('instructionArea');
+      instructionD.innerHTML = Blockly.JavaScript.workspaceToCode(workspace);
+    }
+    </script>
   </body>
 </html>
