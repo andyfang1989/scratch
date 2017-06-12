@@ -10,19 +10,22 @@
       <br>
       <p>{{ initContext.instructionDebugPrint }}</p>
     </div>
-    <div id="loading" class="animation-container" v-if="!initContext.imageLoadingCompleted">
-      <h1>Loading</h1>
-    </div>
-    <div id="animation-container" class="animation-container" v-if="initContext.imageLoadingCompleted">
+    <div id="animation-container" class="animation-container">
+      <div id="loading" class="animation-container-loading" v-if="!initContext.imageLoadingCompleted">
+        <h1>{{ initContext.assetLoadingStatus}}</h1>
+      </div>
       <div id="animation-modal" class="popup">
         <app-modal v-if="initContext.showModal" @close="initContext.initLoading()">
           <h3 slot="body">{{initContext.finalStatus}}</h3>
         </app-modal>
       </div>
       <img id="background" :src="initContext.background_image" class="animation-background">
-      <canvas id="grid-board" class="canvas" width="1000" height="800"></canvas>
-      <canvas id="items" class="canvas" width="1000" height="800"></canvas>
-      <canvas id="character" class="canvas" width="1000" height="800"></canvas>
+
+      <canvas id="grid-board" class="canvas" width="1000" height="800"
+              v-show="initContext.imageLoadingCompleted"></canvas>
+      <canvas id="items" class="canvas" width="1000" height="800" v-show="initContext.imageLoadingCompleted"></canvas>
+      <canvas id="character" class="canvas" width="1000" height="800"
+              v-show="initContext.imageLoadingCompleted"></canvas>
     </div>
   </div>
 </template>
@@ -57,10 +60,18 @@
           fail_speed: 1000,
           debug_mode: false,
           background_image: '../../static/images/knight/background/knight-bg.jpg',
-          front_ground: 'static/images/knight/background/knight-fg.png',
-          character_sprite: 'static/images/knight/walk/walk_0000.png',
-          shadowSprite: 'static/images/knight/shadow/shadow.png',
-          gridSprite: 'static/images/knight/background/grid.png',
+          front_ground_sprites: [
+            'static/images/knight/background/knight-fg.png'
+          ],
+          character_sprites: [
+            'static/images/knight/walk/walk_0000.png'
+          ],
+          shadow_sprites: [
+            'static/images/knight/shadow/shadow.png'
+          ],
+          grid_sprites: [
+            'static/images/knight/background/grid.png'
+          ],
           walk_sprites: [
             'static/images/knight/walk/walk_0000.png',
             'static/images/knight/walk/walk_0004.png',
@@ -227,8 +238,8 @@
           },
           showModal: false,
           finalStatus: '',
-          imageLoadingCompleted: true,
-          imageTotal: 122,
+          imageLoadingCompleted: false,
+          imageTotal: 123,
           imageLoadedCount: 0,
           instructionDebugPrint: '',
           character_starting_x_in_pixel: 0, // This value will be initialized based on actual screen size
@@ -237,6 +248,22 @@
           step_height_in_pixel: 100, // This value will be initialized based on actual screen size
           canvasWidth: 0,
           canvasHeight: 0,
+          shadowImages: [],
+          walkImages: [],
+          walkBackwardImages: [],
+          attackImages: [],
+          attackBackwardImages: [],
+          turnLeftImages: [],
+          turnRightImages: [],
+          victoryImages: [],
+          victoryBackwardImages: [],
+          failImages: [],
+          failBackwardImages: [],
+          characterImages: [],
+          fgImages: [],
+          gridImages: [],
+          itemImages: [],
+          assetLoadingStatus: 'Start Asset Loading...',
           resetInitContext: function () {
             console.log('Reset init context values.')
             this.showModal = false
@@ -248,7 +275,13 @@
             this.step_width_in_pixel = Math.round(this.canvasWidth * this.step_x_percentage)
             this.step_height_in_pixel = Math.round(this.canvasHeight * this.step_y_percentage)
           },
-          incrementImageLoadedCount: function (value) {
+          incrementImageLoadedCount: function (context, value) {
+            context.imageLoadedCount += value
+            if (context.imageLoadedCount === context.imageTotal) {
+              context.imageLoadingCompleted = true
+              console.log('Animation Image Loading Completed with ' + context.imageLoadedCount + ' images.')
+            }
+            console.log('Animation Loading Count: ' + context.imageLoadedCount)
           },
           setCanvasSizeByBackgroundImageSize: function () {
             let bgComponent = document.getElementById('background')
@@ -264,23 +297,15 @@
             mainCharacterCanvas.height = this.canvasHeight
             return mainCharacterContext
           },
-          drawMainCharacterAtStartingPosition: function (ctx) {
-            const cWidth = this.character_width_in_pixel
-            const cHeight = this.character_height_in_pixel
-            const cStartingX = Math.round(this.canvasWidth * this.character_start_x_percentage) + Math.round(this.step_width_in_pixel / 2) - Math.round(cWidth / 2)
-            const cStartingY = Math.round(this.canvasHeight * this.character_start_y_percentage) - cHeight
-            let incrementImageLoadedCount = this.incrementImageLoadedCount
-            const cImg = new Image()
-            const shadowImg = new Image()
-            cImg.onload = function () {
-              console.log('Init loading: ' + cImg.src + ' at location: x = ' + cStartingX + ' and y = ' + cStartingY + ' image size: width = ' + cImg.width + ' height = ' + cImg.height)
-              ctx.drawImage(shadowImg, cStartingX, cStartingY, cWidth, cHeight)
-              ctx.drawImage(cImg, cStartingX, cStartingY, cWidth, cHeight)
-              incrementImageLoadedCount(2)
-              // ctx.strokeRect(cStartingX, cStartingY, cWidth, cHeight)
-            }
-            cImg.src = this.character_sprite
-            shadowImg.src = this.shadowSprite
+          drawMainCharacterAtStartingPosition: function (initContext, mainCharacterCanvasContext) {
+            const cWidth = initContext.character_width_in_pixel
+            const cHeight = initContext.character_height_in_pixel
+            const cStartingX = Math.round(initContext.canvasWidth * initContext.character_start_x_percentage) + Math.round(initContext.step_width_in_pixel / 2) - Math.round(cWidth / 2)
+            const cStartingY = Math.round(initContext.canvasHeight * initContext.character_start_y_percentage) - cHeight
+            console.log('Draw main character at location: x = ' + cStartingX + ' and y = ' + cStartingY + ' image size: width = ' + cWidth + ' height = ' + cHeight)
+            mainCharacterCanvasContext.drawImage(initContext.shadowImages[0], cStartingX, cStartingY, cWidth, cHeight)
+            mainCharacterCanvasContext.drawImage(initContext.characterImages[0], cStartingX, cStartingY, cWidth, cHeight)
+            // ctx.strokeRect(cStartingX, cStartingY, cWidth, cHeight)
           },
           setAndGetItemsCanvasContext: function () {
             const itemsCanvas = document.getElementById('items')
@@ -290,27 +315,21 @@
             itemsCanvas.height = this.canvasHeight
             return itemsContext
           },
-          drawFrontGround: function (itemsContext) {
-            let fImg = new Image()
-            let incrementImageLoadedCount = this.incrementImageLoadedCount
-            let fWidth = this.canvasWidth
-            let fHeight = this.canvasHeight
-            fImg.onload = function () {
-              console.log('Draw front ground image with size width = ' + fWidth + ' height = ' + fHeight)
-              itemsContext.drawImage(fImg, 0, 0, fWidth, fHeight)
-              incrementImageLoadedCount(1)
-            }
-            fImg.src = this.front_ground
+          drawFrontGround: function (initContext, itemsContext) {
+            let fWidth = initContext.canvasWidth
+            let fHeight = initContext.canvasHeight
+            console.log('Draw front ground image with size width = ' + fWidth + ' height = ' + fHeight)
+            itemsContext.drawImage(initContext.fgImages[0], 0, 0, fWidth, fHeight)
           },
-          drawItems: function (itemsContext) {
-            let items = this.items
-            let dGridX = this.passCondition.destinationXGrid
-            let dGridY = this.passCondition.destinationYGrid
-            let gridWidth = this.step_width_in_pixel
-            let gridHeight = this.step_height_in_pixel
-            let gridStartX = Math.round(this.canvasWidth * this.grid_board_top_left_x_percentage)
-            let gridStartY = Math.round(this.canvasHeight * this.grid_board_top_left_y_percentage)
-            console.log('Background width = ' + this.canvasWidth + ' Background height = ' + this.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
+          drawItems: function (initContext, itemsContext) {
+            let items = initContext.items
+            let dGridX = initContext.passCondition.destinationXGrid
+            let dGridY = initContext.passCondition.destinationYGrid
+            let gridWidth = initContext.step_width_in_pixel
+            let gridHeight = initContext.step_height_in_pixel
+            let gridStartX = Math.round(initContext.canvasWidth * initContext.grid_board_top_left_x_percentage)
+            let gridStartY = Math.round(initContext.canvasHeight * initContext.grid_board_top_left_y_percentage)
+            console.log('Background width = ' + initContext.canvasWidth + ' Background height = ' + initContext.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
             if (items.length > 0) {
               let checkValid = function (coordinates, xGridSize, yGridSize, dGridX, dGridY) {
                 console.log('Check valid for map with Size : (' + xGridSize + ' , ' + yGridSize + ') and dX = ' + dGridX + ' dY = ' + dGridY)
@@ -345,12 +364,11 @@
 
               for (let i = 0; i < items.length; i++) {
                 let item = items[i]
-                let iImg = new Image()
                 if (item.random === true) {
                   let iCount = item.count
                   let solvable = false
-                  let xSize = this.grid_x_size
-                  let ySize = this.grid_y_size
+                  let xSize = initContext.grid_x_size
+                  let ySize = initContext.grid_y_size
                   console.log('grid x size = ' + xSize + ' grid y size = ' + ySize + ' destination x = ' + dGridX + ' destination y = ' + dGridY)
                   while (!solvable) {
                     item.coordinates = []
@@ -374,19 +392,13 @@
                     }
                   }
                 }
-                let incrementImageLoadedCount = this.incrementImageLoadedCount
-                iImg.onload = function () {
-                  for (let j = 0; j < item.coordinates.length; j++) {
-                    let position = item.coordinates[j]
-                    let ix = Math.round(gridStartX + position.x * gridWidth) + position.xOffset
-                    let iy = Math.round(gridStartY + position.y * gridHeight) + position.yOffset
-                    console.log('Draw item ' + i + ' at gx = ' + position.x + ' gy = ' + position.y + ' x = ' + ix + ' y = ' + iy)
-                    itemsContext.drawImage(iImg, ix, iy, gridWidth, gridHeight)
-                  }
-                  incrementImageLoadedCount(1)
+                for (let j = 0; j < item.coordinates.length; j++) {
+                  let position = item.coordinates[j]
+                  let ix = Math.round(gridStartX + position.x * gridWidth) + position.xOffset
+                  let iy = Math.round(gridStartY + position.y * gridHeight) + position.yOffset
+                  console.log('Draw item ' + i + ' at gx = ' + position.x + ' gy = ' + position.y + ' x = ' + ix + ' y = ' + iy)
+                  itemsContext.drawImage(initContext.itemImages[i], ix, iy, gridWidth, gridHeight)
                 }
-                console.log('Item image: ' + item.image)
-                iImg.src = item.image
               }
             }
           },
@@ -397,50 +409,111 @@
             gridBoardCanvas.height = this.canvasHeight
             return gridBoardCanvas.getContext('2d')
           },
-          drawGridBoard: function (gridBoardContext) {
-            let gridWidth = this.step_width_in_pixel
-            let gridHeight = this.step_height_in_pixel
-            let gridStartX = Math.round(this.canvasWidth * this.grid_board_top_left_x_percentage)
-            let gridStartY = Math.round(this.canvasHeight * this.grid_board_top_left_y_percentage)
-            let gridXSize = this.grid_x_size
-            let gridYSize = this.grid_y_size
-            let gridImage = new Image()
-            let incrementImageLoadedCount = this.incrementImageLoadedCount
-            console.log('Background width = ' + this.canvasWidth + ' Background height = ' + this.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
-            gridImage.onload = function () {
-              console.log('Draw grid images.')
-              for (let r = 0; r < gridYSize; r++) {
-                for (let c = r % 2; c < gridXSize; c += 2) {
-                  let ix = Math.round(gridStartX + c * gridWidth)
-                  let iy = Math.round(gridStartY + r * gridHeight)
-                  console.log('Draw grid images at r = ' + r + ' c = ' + c + ' x = ' + ix + ' y = ' + iy)
-                  gridBoardContext.drawImage(gridImage, ix, iy, gridWidth, gridHeight)
-                }
+          drawGridBoard: function (initContext, gridBoardContext) {
+            let gridWidth = initContext.step_width_in_pixel
+            let gridHeight = initContext.step_height_in_pixel
+            let gridStartX = Math.round(initContext.canvasWidth * initContext.grid_board_top_left_x_percentage)
+            let gridStartY = Math.round(initContext.canvasHeight * initContext.grid_board_top_left_y_percentage)
+            let gridXSize = initContext.grid_x_size
+            let gridYSize = initContext.grid_y_size
+            console.log('Background width = ' + initContext.canvasWidth + ' Background height = ' + initContext.canvasHeight + ' GridStartX: ' + gridStartX + ' GridStartY = ' + gridStartY + ' GridWidth = ' + gridWidth + ' GridHeight = ' + gridHeight)
+            console.log('Draw grid images.')
+            for (let r = 0; r < gridYSize; r++) {
+              for (let c = r % 2; c < gridXSize; c += 2) {
+                let ix = Math.round(gridStartX + c * gridWidth)
+                let iy = Math.round(gridStartY + r * gridHeight)
+                console.log('Draw grid images at r = ' + r + ' c = ' + c + ' x = ' + ix + ' y = ' + iy)
+                gridBoardContext.drawImage(initContext.gridImages[0], ix, iy, gridWidth, gridHeight)
               }
-              incrementImageLoadedCount(1)
             }
-            gridImage.src = this.gridSprite
+          },
+          loadImageStream: function (sprites, images) {
+            for (let i = 0; i < sprites.length; i++) {
+              let img = new Image()
+              let initContext = this
+              img.onload = function () {
+                initContext.incrementImageLoadedCount(initContext, 1)
+              }
+              img.src = sprites[i]
+              images.push(img)
+            }
+          },
+          loadAllImages: function () {
+            this.assetLoadingStatus = 'Loading Background Images...'
+            this.loadImageStream(this.front_ground_sprites, this.fgImages)
+            this.loadImageStream(this.grid_sprites, this.gridImages)
+            this.loadImageStream(this.character_sprites, this.characterImages)
+            this.loadImageStream(this.shadow_sprites, this.shadowImages)
+            this.assetLoadingStatus = 'Loading Animation Images...'
+            this.loadImageStream(this.walk_sprites, this.walkImages)
+            this.loadImageStream(this.walk_backward_sprites, this.walkBackwardImages)
+            this.loadImageStream(this.attack_sprites, this.attackImages)
+            this.loadImageStream(this.attack_backward_sprites, this.attackBackwardImages)
+            this.loadImageStream(this.victory_sprites, this.victoryImages)
+            this.loadImageStream(this.victory_backward_sprites, this.victoryBackwardImages)
+            this.loadImageStream(this.fail_sprites, this.failImages)
+            this.loadImageStream(this.fail_backward_sprites, this.failBackwardImages)
+
+            let itemSprites = []
+            for (let i = 0; i < this.items.length; i++) {
+              let item = this.items[i]
+              itemSprites.push(item.image)
+            }
+
+            this.loadImageStream(itemSprites, this.itemImages)
+
+            let initContext = this
+            for (let i = 0; i < this.turn_left_sprites.length; i++) {
+              let img = new Image()
+              img.onload = function () {
+                initContext.incrementImageLoadedCount(initContext, 1)
+              }
+              img.src = this.turn_left_sprites[i]
+              this.turnLeftImages.push(img)
+              this.turnRightImages.unshift(img)
+            }
+            this.assetLoadingStatus = 'Images Loading Completed.'
           },
           initLoading: function () {
             this.resetInitContext()
 
             this.setCanvasSizeByBackgroundImageSize()
 
-            let mainCharacterContext = this.setAndGetMainCharacterCanvasContext()
-
             this.calculateAndSetCharacterStartingPositionAndStepSizesResponsively()
+
+            this.loadAllImages()
+
+            const itemsContext = this.setAndGetItemsCanvasContext()
+
+            const mainCharacterContext = this.setAndGetMainCharacterCanvasContext()
 
             const gridBoardContext = this.setAndGetGridBoardCanvasContext()
 
-            this.drawGridBoard(gridBoardContext)
+            let drawGridBoard = this.drawGridBoard
 
-            this.drawMainCharacterAtStartingPosition(mainCharacterContext)
+            let drawMainCharacterAtStartingPosition = this.drawMainCharacterAtStartingPosition
 
-            let itemsContext = this.setAndGetItemsCanvasContext()
+            let drawItems = this.drawItems
 
-            this.drawItems(itemsContext)
+            let drawFrontGround = this.drawFrontGround
 
-            this.drawFrontGround(itemsContext)
+            let initContext = this
+
+            let drawIntervalId = setInterval(function () {
+              if (initContext.imageLoadingCompleted) {
+                console.log('All images loaded, start to draw the board.')
+
+                drawGridBoard(initContext, gridBoardContext)
+
+                drawMainCharacterAtStartingPosition(initContext, mainCharacterContext)
+
+                drawItems(initContext, itemsContext)
+
+                drawFrontGround(initContext, itemsContext)
+
+                clearInterval(drawIntervalId)
+              }
+            }, 1000)
           }
         }
       }
@@ -491,6 +564,12 @@
     top: 0;
     width: 70%;
     height: 100%;
+  }
+
+  .animation-container-loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
   }
 
   .animation-background {

@@ -4,7 +4,6 @@
 import SupportedBlocks from '../metamodel/SupportedBlocks.js'
 
 export default function play (animationContext) {
-  let i
   let stepCount = 0
   const gridX = animationContext.character_starting_x_in_pixel
   const gridY = animationContext.character_starting_y_in_pixel
@@ -24,81 +23,25 @@ export default function play (animationContext) {
   const failSpeed = animationContext.fail_speed
   const actionInterval = animationContext.actionInterval
   const elapseTime = animationContext.elapse_time
-  const shadowSprite = animationContext.shadowSprite
   const maxSteps = animationContext.maxSteps
   const passCondition = animationContext.passCondition
   let items = animationContext.items
   let currentGridX = 0
   let currentGridY = 0
   let actionIntervalIds = []
-
   let faceRight = true
   let drawFinishedFlag = true
-  let shadowImages = []
-
-  let img = new Image()
-  img.src = shadowSprite
-  shadowImages.push(img)
-  let walkImages = []
-  for (i = 0; i < animationContext.walk_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.walk_sprites[i]
-    walkImages.push(img)
-  }
-  let walkBackwardImages = []
-  for (i = 0; i < animationContext.walk_backward_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.walk_backward_sprites[i]
-    walkBackwardImages.push(img)
-  }
-  let attackImages = []
-  for (i = 0; i < animationContext.attack_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.attack_sprites[i]
-    attackImages.push(img)
-  }
-  let attackBackwardImages = []
-  for (i = 0; i < animationContext.attack_backward_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.attack_backward_sprites[i]
-    attackBackwardImages.push(img)
-  }
-  let turnLeftImages = []
-  let turnRightImages = []
-  for (i = 0; i < animationContext.turn_left_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.turn_left_sprites[i]
-    turnLeftImages.push(img)
-    turnRightImages.unshift(img)
-  }
-
-  let victoryImages = []
-  for (i = 0; i < animationContext.victory_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.victory_sprites[i]
-    victoryImages.push(img)
-  }
-
-  let victoryBackwardImages = []
-  for (i = 0; i < animationContext.victory_backward_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.victory_backward_sprites[i]
-    victoryBackwardImages.push(img)
-  }
-
-  let failImages = []
-  for (i = 0; i < animationContext.fail_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.fail_sprites[i]
-    failImages.push(img)
-  }
-
-  let failBackwardImages = []
-  for (i = 0; i < animationContext.fail_backward_sprites.length; i++) {
-    img = new Image()
-    img.src = animationContext.fail_backward_sprites[i]
-    failBackwardImages.push(img)
-  }
+  let shadowImages = animationContext.shadowImages
+  let walkImages = animationContext.walkImages
+  let walkBackwardImages = animationContext.walkBackwardImages
+  let attackImages = animationContext.attackImages
+  let attackBackwardImages = animationContext.attackBackwardImages
+  let turnLeftImages = animationContext.turnLeftImages
+  let turnRightImages = animationContext.turnRightImages
+  let victoryImages = animationContext.victoryImages
+  let victoryBackwardImages = animationContext.victoryBackwardImages
+  let failImages = animationContext.failImages
+  let failBackwardImages = animationContext.failBackwardImages
 
   let mainCharacterCanvas = document.getElementById('character')
   console.log('Canvas size: width = ' + mainCharacterCanvas.width + ' height = ' + mainCharacterCanvas.height)
