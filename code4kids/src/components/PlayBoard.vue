@@ -1,14 +1,15 @@
 <template>
   <div id="play-board-component" class="board">
     <div id="dev-block-flow-container" class="dev-block-flow-container">
-      <textarea class="dev-block-flow-text-area" v-model="initContext.instruction"
-                placeholder="For development only, type in block json here." rows="10" cols="15">
+      <textarea id='instructionArea' class="dev-block-flow-text-area" rows="10" cols="15">
       </textarea>
       <button v-on:click="runAnimation">Run</button>
       <br>
       <p>Instruction: {{ initContext.instruction }}</p>
       <br>
       <p>{{ initContext.instructionDebugPrint }}</p>
+      <button onclick="addBlocksBoard()">Add blocks board</button>
+      <button onclick="updateInstruction()">Update instructions</button>
     </div>
     <div id="animation-container" class="animation-container">
       <div id="loading" class="animation-container-loading" v-if="!initContext.imageLoadingCompleted">
@@ -27,7 +28,8 @@
       <canvas id="character" class="canvas" width="1000" height="800"
               v-show="initContext.imageLoadingCompleted"></canvas>
     </div>
-  </div>
+    <div id='blocklyDiv' class="block-flow-and-drop-area"></div>
+ </div>
 </template>
 
 
@@ -526,6 +528,7 @@
     },
     methods: {
       runAnimation () {
+        this.initContext.instruction = document.getElementById('instructionArea').innerHTML
         let animationContext
         animationContext = this.initContext
         AnimationPlayer(animationContext)
@@ -550,28 +553,33 @@
     top: 0;
     z-index: -1;
     height: 100%;
-    width: 30%;
+    width: 15%;
   }
 
   .dev-block-flow-text-area {
     width: 100%;
-    height: 100%;
+    height: 80%;
   }
 
   .animation-container {
     position: absolute;
-    left: 30%;
+    left: 15%;
     top: 0;
-    width: 70%;
-    height: 100%;
+    width: 85%;
+    height: 70%;
   }
-
+  .block-flow-and-drop-area {
+    position: absolute;
+    left: 15%;
+    top: 80%;
+    width: 85%;
+    height: 30%
+  }
   .animation-container-loading {
     position: absolute;
     left: 50%;
     top: 50%;
   }
-
   .animation-background {
     position: absolute;
     left: 0;
